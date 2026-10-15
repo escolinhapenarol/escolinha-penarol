@@ -287,8 +287,8 @@ async function loadPais(){
     sb.from('pagamentos').select('aluno_id,mes').eq('mes',mes1()),
     sb.from('avisos').select('*').order('criado_em',{ascending:false}).limit(30)
   ]);
-  const cf=await sb.from('config').select('mensalidade').eq('id',1).single();
-  D.alunos=a.data||[];D.pag=p.data||[];D.avisos=v.data||[];D.fee=cf.data?Number(cf.data.mensalidade):80;
+  const cf=await sb.from('config').select('*').eq('id',1).single();
+  D.alunos=a.data||[];D.pag=p.data||[];D.avisos=v.data||[];D.fee=cf.data?Number(cf.data.mensalidade):80;D.pix=cf.data||{};
 }
 function renderPais(extra=''){
   const hj=new Date(),dia=hj.getDate(),mm=pad(hj.getMonth()+1),prox=pad(((hj.getMonth()+1)%12)+1);
@@ -298,8 +298,10 @@ function renderPais(extra=''){
     else if(dia>10){st='<b class="out">Em atraso</b>';info='Venceu em 10/'+mm}
     else{st='<b>Pendente</b>';info='Vence em 10/'+mm}
     return `<div class="card ok"><h3>${esc(s.nome)}</h3><p class="hint" style="margin:0 0 4px">Categoria ${c.nome} (${c.faixa})</p>${slots(c)}<div class="row"><div><b>Mensalidade de ${fmt(D.fee)}</b><small>Vence todo dia 10</small></div><div style="text-align:right">${st}<small>${info}</small></div></div></div>`}).join('')||'<div class="card"><p class="hint" style="margin:0">Nenhum aluno inscrito ainda. Preencha abaixo para inscrever seu filho.</p></div>';
+  const px=D.pix||{};
+  const pixCard=(px.pix_chave&&D.alunos.length)?`<div class="card"><h3>Como pagar (PIX)</h3><p class="hint" style="margin:0 0 8px">Pague no app do seu banco e avise a escolinha. A mensalidade só aparece como paga depois da conferência.</p><div class="row"><span>Recebedor</span><b>${esc(px.pix_nome)}</b></div>${px.pix_banco?`<div class="row"><span>Banco</span><b>${esc(px.pix_banco)}</b></div>`:''}<div class="row" style="flex-direction:column;align-items:stretch"><small>Chave PIX (aleatória)</small><b style="word-break:break-all;font-size:15px;margin:4px 0 10px">${esc(px.pix_chave)}</b><button class="btn p" data-act="copiar" style="margin:0">Copiar chave PIX</button></div></div>`:'';
   const av=D.avisos.map(a=>`<div class="row"><div><b>${esc(a.titulo)}</b><small>${esc(a.mensagem)}</small><small>${br(a.criado_em)}</small></div></div>`).join('')||'<p class="hint">Nenhum aviso por enquanto.</p>';
-  $('#paisc').innerHTML=`<h2 style="font-size:28px;margin-top:18px">Olá, ${esc((perfil.nome||'').split(' ')[0])}</h2>${extra}${cards}
+  $('#paisc').innerHTML=`<h2 style="font-size:28px;margin-top:18px">Olá, ${esc((perfil.nome||'').split(' ')[0])}</h2>${extra}${cards}${pixCard}
   <div class="card"><h3>Avisos</h3>${av}</div>
   <div class="card"><h3>Inscrever aluno</h3>
     <label for="an">Nome do aluno</label><input id="an" autocomplete="off">
@@ -331,11 +333,11 @@ async function loadOwner(){
     sb.from('pagamentos').select('id,aluno_id,mes').eq('mes',mes1()),
     sb.from('lancamentos').select('*').order('data',{ascending:false}),
     sb.from('avisos').select('*, alunos(nome)').order('criado_em',{ascending:false}).limit(50),
-    sb.from('config').select('mensalidade').eq('id',1).single(),
+    sb.from('config').select('*').eq('id',1).single(),
     sb.from('presencas').select('aluno_id').eq('data',cd).eq('presente',true)
   ]);
   D.alunos=a.data||[];D.pag=p.data||[];D.lanc=l.data||[];D.avisos=v.data||[];
-  D.fee=cf.data?Number(cf.data.mensalidade):80;
+  D.fee=cf.data?Number(cf.data.mensalidade):80;D.pix=cf.data||{};
   D.pres={};(pr.data||[]).forEach(x=>D.pres[x.aluno_id]=1);
   const e=[a,p,l,v,cf,pr].find(r=>r.error&&r.status!==406);if(e)toast('Alguns dados não carregaram. Atualize a página.');
 }
@@ -393,6 +395,10 @@ function vAlunos(){
   return `<div class="grid3"><div class="k"><small>Alunos</small><b>${D.alunos.length}</b></div><div class="k"><small>Pagaram</small><b class="in">${pagos.size}</b></div><div class="k"><small>Pendentes</small><b class="out">${Math.max(0,D.alunos.length-pagos.size)}</b></div></div>
   <label for="fee">Mensalidade (R$)</label><input id="fee" type="number" inputmode="decimal" min="0" step="0.01" value="${D.fee}">
   <p class="hint">Vencimento todo dia 10. Ao marcar como pago, a mensalidade entra sozinha no fluxo de caixa.</p>
+  <div class="card"><h3>Chave PIX</h3><p class="hint" style="margin:0">Aparece para os responsáveis na hora de pagar.</p>
+  <label for="pixc">Chave PIX</label><input id="pixc" autocomplete="off" value="${esc((D.pix||{}).pix_chave)}">
+  <label for="pixn">Nome do recebedor</label><input id="pixn" autocomplete="off" value="${esc((D.pix||{}).pix_nome)}">
+  <label for="pixb">Banco</label><input id="pixb" autocomplete="off" value="${esc((D.pix||{}).pix_banco)}"></div>
   <div class="card">${rows}</div>`;
 }
 function vAvisos(){
@@ -409,6 +415,12 @@ function vAvisos(){
 /* ---------- Ações do dono ---------- */
 async function acao(d,btn){
   const fail=e=>{if(e){toast(traduz(e));return true}return false};
+  if(d.act==='copiar'){
+    const k=(D.pix&&D.pix.pix_chave)||'';
+    try{await navigator.clipboard.writeText(k);toast('Chave PIX copiada.')}
+    catch(e){const t=document.createElement('textarea');t.value=k;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();try{document.execCommand('copy');toast('Chave PIX copiada.')}catch(_){toast('Não foi possível copiar. Selecione e copie a chave.')}t.remove()}
+    return;
+  }
   if(d.act==='pres'){
     const on=!!D.pres[d.id];D.pres[d.id]=on?0:1;const y=window.scrollY;renderOwner('chamada');window.scrollTo(0,y);
     const r=on?await sb.from('presencas').delete().eq('aluno_id',d.id).eq('data',cd):await sb.from('presencas').upsert({aluno_id:d.id,data:cd,presente:true});
@@ -460,6 +472,12 @@ document.addEventListener('click',e=>{
   else acao(d,t);
 });
 document.addEventListener('change',async e=>{
+  if(['pixc','pixn','pixb'].includes(e.target.id)){
+    const v={pix_chave:$('#pixc').value.trim(),pix_nome:$('#pixn').value.trim(),pix_banco:$('#pixb').value.trim()};
+    const{error}=await sb.from('config').update(v).eq('id',1);
+    if(error)toast('Não foi possível salvar a chave PIX.');else{Object.assign(D.pix,v);toast('Chave PIX atualizada.')}
+    return;
+  }
   if(e.target.id==='cdt'&&e.target.value){cd=e.target.value;await refreshOwner('chamada')}
   if(e.target.id==='fee'){
     const v=Math.max(0,parseFloat(e.target.value)||0);
