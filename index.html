@@ -232,7 +232,7 @@ const PUB={todos:'Todos os responsáveis',maiores:'Categoria dos 9 aos 13 anos',
 
 function idade(nasc){const n=new Date(),b=new Date(nasc+'T12:00:00');let a=n.getFullYear()-b.getFullYear();const m=n.getMonth()-b.getMonth();if(m<0||(m===0&&n.getDate()<b.getDate()))a--;return a}
 const catDe=a=>a>=9&&a<=13?'maiores':a>=5&&a<=8?'menores':null;
-const av=(s,g)=>`<span class="av${g?' g':''}"${s.foto?` style="background-image:url(${esc(s.foto)})"`:''}>${s.foto?'':esc((s.nome||'?').trim().charAt(0).toUpperCase())}</span>`;
+const avatar=(s,g)=>`<span class="av${g?' g':''}"${s.foto?` style="background-image:url(${esc(s.foto)})"`:''}>${s.foto?'':esc((s.nome||'?').trim().charAt(0).toUpperCase())}</span>`;
 let fotoNova='',fotoAlvo=null;
 function fotoDe(file){return new Promise((ok,no)=>{const r=new FileReader();r.onerror=no;r.onload=()=>{const im=new Image();im.onerror=no;im.onload=()=>{const z=256,cv=document.createElement('canvas');cv.width=cv.height=z;const m=Math.min(im.width,im.height);cv.getContext('2d').drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,z,z);ok(cv.toDataURL('image/jpeg',.8))};im.src=r.result};r.readAsDataURL(file)})}
 const slots=c=>c.h.map(([d,h])=>`<div class="row"><b>${d}</b><span>${h}</span></div>`).join('');
@@ -363,7 +363,7 @@ function renderPais(extra=''){
     if(pago){st='<b class="in">Paga</b>';info=VENC?'Próximo vencimento: '+pad(VENC)+'/'+prox:''}
     else if(VENC&&dia>VENC){st='<b class="out">Em atraso</b>';info='Venceu em '+pad(VENC)+'/'+mm}
     else{st='<b>Pendente</b>';info=VENC?'Vence em '+pad(VENC)+'/'+mm:''}
-    return `<div class="card ok"><div class="head">${av(s,1)}<div><h3>${esc(s.nome)}</h3><p class="hint" style="margin:4px 0 0">${c.nome}</p><button class="fbtn" data-act="fotobtn" data-id="${s.id}">${s.foto?'Trocar foto':'Adicionar foto'}</button></div></div><div style="height:8px"></div>${slots(c)}<div class="row"><div><b>Mensalidade de ${fmt(D.fee)}</b>${VENC?`<small>Vence todo dia ${VENC}</small>`:''}</div><div style="text-align:right">${st}<small>${info}</small></div></div></div>`}).join('')||'<div class="card"><p class="hint" style="margin:0">Nenhum aluno inscrito ainda. Preencha abaixo para inscrever seu filho.</p></div>';
+    return `<div class="card ok"><div class="head">${avatar(s,1)}<div><h3>${esc(s.nome)}</h3><p class="hint" style="margin:4px 0 0">${c.nome}</p><button class="fbtn" data-act="fotobtn" data-id="${s.id}">${s.foto?'Trocar foto':'Adicionar foto'}</button></div></div><div style="height:8px"></div>${slots(c)}<div class="row"><div><b>Mensalidade de ${fmt(D.fee)}</b>${VENC?`<small>Vence todo dia ${VENC}</small>`:''}</div><div style="text-align:right">${st}<small>${info}</small></div></div></div>`}).join('')||'<div class="card"><p class="hint" style="margin:0">Nenhum aluno inscrito ainda. Preencha abaixo para inscrever seu filho.</p></div>';
   const px=D.pix||{};
   const pixCard=(px.pix_chave&&D.alunos.length)?`<div class="card"><h3>Como pagar (PIX)</h3><p class="hint" style="margin:0 0 8px">Pague no app do seu banco e avise a escolinha. A mensalidade só aparece como paga depois da conferência.</p><div class="row"><span>Recebedor</span><b>${esc(px.pix_nome)}</b></div>${px.pix_banco?`<div class="row"><span>Banco</span><b>${esc(px.pix_banco)}</b></div>`:''}<div class="row" style="flex-direction:column;align-items:stretch"><small>Chave PIX (aleatória)</small><b style="word-break:break-all;font-size:15px;margin:4px 0 10px">${esc(px.pix_chave)}</b><button class="btn p" data-act="copiar" style="margin:0">Copiar chave PIX</button></div></div>`:'';
   const av=D.avisos.map(a=>`<div class="row"><div><b>${esc(a.titulo)}</b><small>${esc(a.mensagem)}</small><small>${br(a.criado_em)}</small></div></div>`).join('')||'<p class="hint">Nenhum aviso por enquanto.</p>';
@@ -468,7 +468,7 @@ async function verFicha(id){
   const cab=`<h2 style="font-size:26px;margin:18px 0 4px">Ficha de inscrição</h2><p class="hint" style="margin:0">Escolinha de Futebol do Peñarol, Sapiranga/RS</p>`;
   const bt=`<button class="btn p noprint" data-act="imprimir" style="margin-top:16px">Imprimir ficha</button>`;
   if(error){$('#fichav').innerHTML=cab+'<p class="err">Não foi possível carregar a ficha.</p>';return}
-  const atl=`<div class="card"><div class="head" style="margin-bottom:6px">${av(s,1)}<h3>Dados do atleta</h3></div>${kv('Nome',s.nome)}${kv('Nascimento',br(s.nasc)+' ('+idade(s.nasc)+' anos)')}${kv('Categoria',c.nome)}`;
+  const atl=`<div class="card"><div class="head" style="margin-bottom:6px">${avatar(s,1)}<h3>Dados do atleta</h3></div>${kv('Nome',s.nome)}${kv('Nascimento',br(s.nasc)+' ('+idade(s.nasc)+' anos)')}${kv('Categoria',c.nome)}`;
   if(!f){$('#fichav').innerHTML=cab+atl+'<p class="hint" style="margin-top:10px">Este aluno ainda não tem ficha de inscrição preenchida.</p></div>';return}
   const sn=t=>t?'Sim: '+t:'Não';
   $('#fichav').innerHTML=cab+bt+atl+kv('CPF/RG',f.cpf_rg_atleta)+kv('Endereço',f.endereco)+kv('Bairro',f.bairro)+kv('Cidade',f.cidade)+kv('Escola',f.escola)+kv('Camiseta',f.camiseta)+`</div>
@@ -504,7 +504,7 @@ function vChamada(){
   const dia=new Date(cd+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'});
   const blocos=Object.entries(CATS).map(([k,c])=>{
     const l=D.alunos.filter(s=>s.categoria===k),n=l.filter(s=>D.pres[s.id]).length;
-    const rows=l.map(s=>`<div class="row"><div class="who">${av(s)}<div><b>${esc(s.nome)}</b><small>${idade(s.nasc)} anos, resp. ${esc(s.profiles&&s.profiles.nome)}</small></div></div><button class="pg ${D.pres[s.id]?'on':''}" data-act="pres" data-id="${s.id}">${D.pres[s.id]?'Presente':'Ausente'}</button></div>`).join('')||'<p class="hint">Nenhum aluno inscrito nesta categoria.</p>';
+    const rows=l.map(s=>`<div class="row"><div class="who">${avatar(s)}<div><b>${esc(s.nome)}</b><small>${idade(s.nasc)} anos, resp. ${esc(s.profiles&&s.profiles.nome)}</small></div></div><button class="pg ${D.pres[s.id]?'on':''}" data-act="pres" data-id="${s.id}">${D.pres[s.id]?'Presente':'Ausente'}</button></div>`).join('')||'<p class="hint">Nenhum aluno inscrito nesta categoria.</p>';
     return `<div class="card"><h3>${c.nome}</h3><p class="hint" style="margin:0 0 4px">Segunda ${c.h[0][1]} e sábado ${c.h[1][1]}. ${n} de ${l.length} presentes.</p>${rows}</div>`}).join('');
   return `<label for="cdt">Data do treino</label><input id="cdt" type="date" value="${cd}"><p class="hint">${dia}</p>${blocos}`;
 }
@@ -542,7 +542,7 @@ function vLanc(){
 function vAlunos(){
   const pagos=new Set(D.pag.map(x=>x.aluno_id)),late=VENC&&new Date().getDate()>VENC;
   const rows=D.alunos.map(s=>{const c=CATS[s.categoria],p=pagos.has(s.id);
-    return `<div class="row"><div class="who">${av(s)}<div><button class="lnkname" data-act="verficha" data-id="${s.id}">${esc(s.nome)}</button><small>${c.nome}, resp. ${esc(s.profiles&&s.profiles.nome)}${s.profiles&&s.profiles.tel?', '+esc(s.profiles.tel):''}</small></div></div><div style="display:flex;align-items:center;gap:4px"><button class="pg ${p?'on':''}" data-act="pago" data-id="${s.id}">${p?'Pago':(late?'Atrasado':'Pendente')}</button><button class="x" data-act="delal" data-id="${s.id}" aria-label="Remover aluno">×</button></div></div>`}).join('')||'<p class="hint">Nenhum aluno inscrito ainda.</p>';
+    return `<div class="row"><div class="who">${avatar(s)}<div><button class="lnkname" data-act="verficha" data-id="${s.id}">${esc(s.nome)}</button><small>${c.nome}, resp. ${esc(s.profiles&&s.profiles.nome)}${s.profiles&&s.profiles.tel?', '+esc(s.profiles.tel):''}</small></div></div><div style="display:flex;align-items:center;gap:4px"><button class="pg ${p?'on':''}" data-act="pago" data-id="${s.id}">${p?'Pago':(late?'Atrasado':'Pendente')}</button><button class="x" data-act="delal" data-id="${s.id}" aria-label="Remover aluno">×</button></div></div>`}).join('')||'<p class="hint">Nenhum aluno inscrito ainda.</p>';
   return `<div class="grid3"><div class="k"><small>Alunos</small><b>${D.alunos.length}</b></div><div class="k"><small>Pagaram</small><b class="in">${pagos.size}</b></div><div class="k"><small>Pendentes</small><b class="out">${Math.max(0,D.alunos.length-pagos.size)}</b></div></div>
   <label for="fee">Mensalidade (R$)</label><input id="fee" type="number" inputmode="decimal" min="0" step="0.01" value="${D.fee}">
   <p class="hint">${VENC?'Vencimento todo dia '+VENC+'. ':''}Ao marcar como pago, a mensalidade entra sozinha no fluxo de caixa.</p>
