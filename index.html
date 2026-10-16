@@ -221,8 +221,8 @@ const br=s=>String(s).slice(0,10).split('-').reverse().join('/');
 const sum=(l,t)=>l.filter(x=>x.tipo===t).reduce((a,x)=>a+Number(x.valor),0);
 
 const CATS={
- menores:{nome:'Categoria dos 5 aos 8 anos',h:[['Segunda-feira','19:30 às 20:30'],['Sábado','09:00 às 10:00']]},
- maiores:{nome:'Categoria dos 9 aos 13 anos',h:[['Segunda-feira','18:30 às 19:30'],['Sábado','08:00 às 09:00']]}
+ menores:{nome:'Categoria dos 5 aos 8 anos',h:[['Segunda-feira','18:30 às 19:30'],['Sábado','09:00 às 10:00']]},
+ maiores:{nome:'Categoria dos 9 aos 13 anos',h:[['Segunda-feira','19:30 às 20:30'],['Sábado','08:00 às 09:00']]}
 };
 const CIN=['Mensalidades','Patrocínio','Matrícula','Outras entradas'];
 const COUT=['Ginásio','Uniformes','Material esportivo','Outras saídas'];
@@ -240,6 +240,10 @@ const slots=c=>c.h.map(([d,h])=>`<div class="row"><b>${d}</b><span>${h}</span></
 let sb,user=null,perfil=null,tab='chamada',ltipo='in',cd=today(),routedFor=null,busy=false,recovering=false,adminTry=false;
 let D={alunos:[],pag:[],lanc:[],avisos:[],pres:{},fee:80};
 
+async function copiarTexto(t){
+  try{await navigator.clipboard.writeText(t);toast('Mensagem copiada.')}
+  catch(e){const a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();try{document.execCommand('copy');toast('Mensagem copiada.')}catch(_){toast('Não foi possível copiar.')}a.remove()}
+}
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),2800)}
 function traduz(e){
   const m=(e&&e.message||'').toLowerCase();
@@ -539,11 +543,38 @@ function vLanc(){
   <button class="btn p" data-act="addtx" style="margin-top:16px">Salvar lançamento</button></div>
   <div class="card"><h3>Histórico</h3>${rows}</div>`;
 }
+const convite=()=>`⚽🖤💛 *ESCOLINHA PEÑAROL – SAPIRANGA/RS* 💛🖤⚽
+
+Olá, responsável! A inscrição do seu filho agora é pelo nosso aplicativo. 🎉
+
+📲 *Acesse pelo link:*
+${location.origin+location.pathname}
+
+*Como fazer:*
+1️⃣ Toque em *Entrar como Aluno* e depois em *Criar minha conta*
+2️⃣ Confirme seu e-mail (olhe também no spam)
+3️⃣ Entre no app e preencha a *ficha de inscrição* do atleta. Se quiser, coloque a foto dele(a)
+4️⃣ Pronto! O app mostra a categoria, o dia e o horário do treino
+
+🕒 *Horários de treino*
+• ${CATS.menores.nome}: segunda ${CATS.menores.h[0][1]} e sábado ${CATS.menores.h[1][1]}
+• ${CATS.maiores.nome}: segunda ${CATS.maiores.h[0][1]} e sábado ${CATS.maiores.h[1][1]}
+
+No app você também acompanha os avisos, vê o valor da mensalidade e a chave PIX.
+
+💡 Dica: abra o link no celular e toque em *Compartilhar > Adicionar à Tela de Início*.
+
+*Disciplina, respeito e união: essa é a nossa missão!*
+#SomosPeñarol 💛🖤`;
 function vAlunos(){
   const pagos=new Set(D.pag.map(x=>x.aluno_id)),late=VENC&&new Date().getDate()>VENC;
   const rows=D.alunos.map(s=>{const c=CATS[s.categoria],p=pagos.has(s.id);
     return `<div class="row"><div class="who">${avatar(s)}<div><button class="lnkname" data-act="verficha" data-id="${s.id}">${esc(s.nome)}</button><small>${c.nome}, resp. ${esc(s.profiles&&s.profiles.nome)}${s.profiles&&s.profiles.tel?', '+esc(s.profiles.tel):''}</small></div></div><div style="display:flex;align-items:center;gap:4px"><button class="pg ${p?'on':''}" data-act="pago" data-id="${s.id}">${p?'Pago':(late?'Atrasado':'Pendente')}</button><button class="x" data-act="delal" data-id="${s.id}" aria-label="Remover aluno">×</button></div></div>`}).join('')||'<p class="hint">Nenhum aluno inscrito ainda.</p>';
-  return `<div class="grid3"><div class="k"><small>Alunos</small><b>${D.alunos.length}</b></div><div class="k"><small>Pagaram</small><b class="in">${pagos.size}</b></div><div class="k"><small>Pendentes</small><b class="out">${Math.max(0,D.alunos.length-pagos.size)}</b></div></div>
+  return `<div class="card ok"><h3>Convidar os pais</h3><p class="hint" style="margin:0">Envia o link do app com o passo a passo da inscrição.</p>
+  <button class="btn p" data-act="share" style="margin-top:12px">Compartilhar o app</button>
+  <button class="btn" data-act="wpp">Enviar pelo WhatsApp</button>
+  <button class="btn" data-act="copiarmsg">Copiar mensagem</button></div>
+  <div class="grid3"><div class="k"><small>Alunos</small><b>${D.alunos.length}</b></div><div class="k"><small>Pagaram</small><b class="in">${pagos.size}</b></div><div class="k"><small>Pendentes</small><b class="out">${Math.max(0,D.alunos.length-pagos.size)}</b></div></div>
   <label for="fee">Mensalidade (R$)</label><input id="fee" type="number" inputmode="decimal" min="0" step="0.01" value="${D.fee}">
   <p class="hint">${VENC?'Vencimento todo dia '+VENC+'. ':''}Ao marcar como pago, a mensalidade entra sozinha no fluxo de caixa.</p>
   <div class="card"><h3>Chave PIX</h3><p class="hint" style="margin:0">Aparece para os responsáveis na hora de pagar.</p>
@@ -619,6 +650,12 @@ document.addEventListener('click',e=>{
   else if(d.act==='forgot')doForgot(t);
   else if(d.act==='reset')doReset(t);
   else if(d.act==='loginadm')doLoginAdm(t);
+  else if(d.act==='share'){
+    const text=convite();
+    if(navigator.share){navigator.share({title:'Escolinha Peñarol',text}).catch(()=>{})}
+    else copiarTexto(text)}
+  else if(d.act==='wpp')window.open('https://wa.me/?text='+encodeURIComponent(convite()),'_blank');
+  else if(d.act==='copiarmsg')copiarTexto(convite());
   else if(d.act==='fotobtn'){fotoAlvo=d.id;const i=$('#fotoinp');if(i){i.value='';i.click()}}
   else if(d.act==='abrirficha')abrirFicha();
   else if(d.act==='enviarficha')doFicha(t);
