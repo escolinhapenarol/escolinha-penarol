@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7uUjSobQQomJIBtDWeCa+C6oBEqKRtPDbD9SkJqiAJA=' 'sha256-bCg1iwyPoYryIUnPzoOB5hPhNhShA/ZA/YYg+SjlA7E=' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src https://ihiaoaorhyefhysqgadr.supabase.co wss://ihiaoaorhyefhysqgadr.supabase.co; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7uUjSobQQomJIBtDWeCa+C6oBEqKRtPDbD9SkJqiAJA=' 'sha256-VQW/F5T4uWpWNMVr4TCpL8b2d4rNXcuq9dnnWVxuZO8=' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src https://ihiaoaorhyefhysqgadr.supabase.co wss://ihiaoaorhyefhysqgadr.supabase.co; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Escolinha Peñarol</title>
@@ -105,6 +105,20 @@ input[type=time]{display:block;min-width:0;max-width:100%;-webkit-appearance:non
 .nota button{padding:11px 0;border-radius:10px;border:1.5px solid var(--ln);background:var(--bk2);color:var(--wh);font:700 16px 'Barlow',sans-serif;cursor:pointer}
 .nota button.on{background:var(--ye);border-color:var(--ye);color:#0a0a0a}
 .seg5{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:6px}.seg5 i{height:9px;border-radius:5px;background:var(--bk3)}.seg5 i.on{background:var(--ye)}
+.per{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0 2px}
+.per b{font:400 22px 'Anton',Impact,sans-serif;text-transform:uppercase;letter-spacing:.02em;text-align:center}
+.per .mini{min-width:46px;min-height:44px;font-size:22px;line-height:1}.per .mini:disabled{opacity:.3}
+.gscroll{overflow-x:auto;margin-top:12px;border:1px solid var(--ln);border-radius:12px;-webkit-overflow-scrolling:touch;background:var(--bk2)}
+table.grade{border-collapse:separate;border-spacing:0;font-size:13px;min-width:100%}
+.grade th,.grade td{padding:5px 3px;text-align:center;border-bottom:1px solid var(--ln);white-space:nowrap}
+.grade tr:last-child td{border-bottom:0}
+.grade th{color:var(--mut);font-weight:700;text-transform:capitalize}
+.grade .nm{position:sticky;left:0;background:var(--bk2);text-align:left;padding-left:10px;max-width:118px;overflow:hidden;text-overflow:ellipsis;z-index:1;font-weight:600}
+.grade .tot{color:var(--mut);font-weight:700;padding-right:10px}
+.gc{width:36px;height:36px;border-radius:8px;border:0;font:700 15px 'Barlow',sans-serif;cursor:pointer}
+.gc.s{background:var(--gr);color:#0a0a0a}.gc.n{background:#3a1414;color:#ffb3b3;border:1.5px solid var(--rd)}.gc.x{background:transparent;color:#6f6a60}
+.leg{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;color:var(--mut);font-size:13px}.leg span{display:inline-flex;align-items:center;gap:6px}
+.leg i{display:inline-block;width:14px;height:14px;border-radius:4px}
 .fbtn{display:inline-block;margin-top:6px;background:none;border:1.5px solid var(--ye);color:var(--ye);border-radius:999px;padding:6px 14px;font:700 13px 'Barlow',sans-serif;cursor:pointer}
 @media print{.banner{display:none!important}.av{border-color:#000!important;color:#000!important}}
 </style>
@@ -252,7 +266,7 @@ input[type=time]{display:block;min-width:0;max-width:100%;-webkit-appearance:non
   <div class="banner"><button class="sair" data-act="sair">Sair</button><span class="quem">Painel do administrador</span></div>
   <div class="wrap" id="ownc"></div>
   <nav class="nav" aria-label="Seções do painel">
-    <button data-tab="chamada">Chamada</button><button data-tab="jogos">Jogos</button><button data-tab="resumo">Resumo</button><button data-tab="lanc">Caixa</button><button data-tab="alunos">Alunos</button><button data-tab="avisos">Avisos</button>
+    <button data-tab="chamada">Chamada</button><button data-tab="jogos">Jogos</button><button data-tab="resumo">Finanças</button><button data-tab="lanc">Caixa</button><button data-tab="alunos">Alunos</button><button data-tab="avisos">Avisos</button>
   </nav>
 </section>
 
@@ -292,6 +306,38 @@ function idade(nasc){const n=new Date(),b=new Date(nasc+'T12:00:00');let a=n.get
 const catDe=a=>a>=9&&a<=13?'maiores':a>=5&&a<=8?'menores':null;
 const avatar=(s,g)=>`<span class="av${g?' g':''}"${s.foto?` style="background-image:url(${esc(s.foto)})"`:''}>${s.foto?'':esc((s.nome||'?').trim().charAt(0).toUpperCase())}</span>`;
 let fotoNova='',fotoAlvo=null,compAlvo=null,avalAlvo=null,avalVals={},avalVolta='home',profModo='chamada';
+let finModo='mes',finMes='',finAno=new Date().getFullYear();
+const MESC=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const MESN=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const ymOf=d=>d.getFullYear()+'-'+pad(d.getMonth()+1);
+const ymAdd=(ym,n)=>{const p=ym.split('-').map(Number);return ymOf(new Date(p[0],p[1]-1+n,1))};
+const ymNome=ym=>MESN[Number(ym.slice(5,7))-1]+' de '+ym.slice(0,4);
+const desdeYm=s=>String(s.cobrar_desde||mes1()).slice(0,7);
+const pagoEm=(id,ym)=>(D.pagAll||[]).find(x=>x.aluno_id===id&&String(x.mes).slice(0,7)===ym);
+const ativoEm=(s,ym)=>desdeYm(s)<=ym||!!pagoEm(s.id,ym);
+function mensal(ym){
+  const cur=ymOf(new Date()),at=D.alunos.filter(s=>ativoEm(s,ym));
+  let prev=0,rec=0;const abertos=[];
+  at.forEach(s=>{const p=pagoEm(s.id,ym);if(p){prev+=Number(p.valor||0);rec+=Number(p.valor||0)}else{prev+=D.fee;if(ym<=cur)abertos.push(s)}});
+  return {n:at.length,prev,rec,abertos,pagos:at.length-abertos.length};
+}
+function devidos(s,ate){const out=[];let m=desdeYm(s);for(let i=0;i<240&&m<=ate;i++,m=ymAdd(m,1))if(!pagoEm(s.id,m))out.push(m);return out}
+function chartBars(ms,label){
+  const n=ms.length,gw=300/n,bw=Math.min(16,Math.max(5,(gw-8)/2)),mx=Math.max(1,...ms.flatMap(m=>[m.i,m.o]));
+  const b=ms.map((m,j)=>{const x=10+j*gw+(gw-2*bw-2)/2,hi=m.i/mx*108,ho=m.o/mx*108;
+    return `<rect class="bi" x="${x}" y="${120-hi}" width="${bw}" height="${hi}" rx="3"/><rect class="bo" x="${x+bw+2}" y="${120-ho}" width="${bw}" height="${ho}" rx="3"/><text x="${x+bw+1}" y="136" text-anchor="middle">${m.l}</text>`}).join('');
+  return `<svg viewBox="0 0 320 142" width="100%" role="img" aria-label="${label}">${b}</svg>`;
+}
+function porCat(l,tipo,vazio){
+  const por={};l.filter(x=>x.tipo===tipo).forEach(x=>por[x.categoria]=(por[x.categoria]||0)+Number(x.valor));
+  const to=Object.values(por).reduce((a,b)=>a+b,0)||1;
+  return Object.entries(por).sort((a,b)=>b[1]-a[1]).map(([c,v])=>`<div style="margin-top:12px"><div class="row" style="border:0;padding:0"><span>${esc(c)}</span><b>${fmt(v)}</b></div><div class="hb"><i style="width:${v/to*100}%${tipo==='out'?';background:var(--rd)':''}"></i></div></div>`).join('')||`<p class="hint">${vazio}</p>`;
+}
+function msgCobranca(s,meses){
+  const nm=String(s.profiles&&s.profiles.nome||'').split(' ')[0],lista=meses.map(m=>MESN[Number(m.slice(5,7))-1]+(m.slice(0,4)!==String(new Date().getFullYear())?'/'+m.slice(0,4):''));
+  const txt=lista.length>1?lista.slice(0,-1).join(', ')+' e '+lista[lista.length-1]:lista[0];
+  return `Olá${nm?', '+nm:''}! Aqui é da Escolinha Peñarol. ${meses.length>1?'As mensalidades':'A mensalidade'} de ${txt} do(a) ${s.nome} ${meses.length>1?'estão':'está'} em aberto (total de ${fmt(meses.length*D.fee)}). Dá para pagar pelo PIX no app e enviar o comprovante por lá: ${location.origin+location.pathname}\nObrigado! 💛🖤`;
+}
 const FUND=[['passe','Passe'],['conducao','Condução de bola'],['finalizacao','Finalização'],['marcacao','Marcação'],['equipe','Trabalho em equipe'],['disciplina','Disciplina']];
 const ROT=['','Começando','Em evolução','Bom','Muito bom','Destaque'];
 const semAtual=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()<6?1:2)};
@@ -602,7 +648,7 @@ async function verFicha(id){
   const{data:f,error}=await sb.from('fichas').select('*').eq('aluno_id',id).maybeSingle();
   const c=CATS[s.categoria],kv=(k,v)=>`<div class="row kv"><span>${k}</span><b>${esc(v||'—')}</b></div>`;
   const cab=`<h2 style="font-size:26px;margin:18px 0 4px">Ficha de inscrição</h2><p class="hint" style="margin:0">Escolinha de Futebol do Peñarol, Sapiranga/RS</p>`;
-  const bt=`<button class="btn p noprint" data-act="imprimir" style="margin-top:16px">Imprimir ficha</button>`,avb=`<button class="btn noprint" data-act="avaliar" data-id="${id}">Avaliação do semestre</button>`;
+  const bt=`<button class="btn p noprint" data-act="imprimir" style="margin-top:16px">Imprimir ficha</button>`,avb=`<button class="btn noprint" data-act="avaliar" data-id="${id}">Avaliação do semestre</button>`+(()=>{const cur=ymOf(new Date()),d=desdeYm(s),o=[];for(let i=0;i<24;i++)o.push(ymAdd(cur,-i));if(!o.includes(d))o.push(d);return `<div class="card noprint"><h3>Mensalidade</h3><label for="cdesde" style="margin-top:4px">Cobrar a partir de</label><select id="cdesde" data-id="${id}">${o.map(k=>`<option value="${k}"${k===d?' selected':''}>${ymNome(k)}</option>`).join('')}</select><p class="hint">Meses antes disso não aparecem como em aberto na grade.</p></div>`})();
   if(error){$('#fichav').innerHTML=cab+'<p class="err">Não foi possível carregar a ficha.</p>';return}
   const atl=`<div class="card"><div class="head" style="margin-bottom:6px">${avatar(s,1)}<h3>Dados do atleta</h3></div>${kv('Nome',s.nome)}${kv('Nascimento',br(s.nasc)+' ('+idade(s.nasc)+' anos)')}${kv('Categoria',c.nome)}`;
   if(!f){$('#fichav').innerHTML=cab+atl+'<p class="hint" style="margin-top:10px">Este aluno ainda não tem ficha de inscrição preenchida.</p></div>'+avb;return}
@@ -668,14 +714,15 @@ async function loadOwner(){
   D.alunos=a.data||[];D.pag=p.data||[];D.lanc=l.data||[];D.avisos=v.data||[];
   D.fee=cf.data?Number(cf.data.mensalidade):80;D.pix=cf.data||{};
   D.pres={};(pr.data||[]).forEach(x=>D.pres[x.aluno_id]=1);
-  const [ev,rs,cp,al,ct]=await Promise.all([
+  const [ev,rs,cp,al,ct,pa]=await Promise.all([
     sb.from('eventos').select('*').gte('quando',new Date(Date.now()-6*3600e3).toISOString()).order('quando'),
     sb.from('respostas').select('*'),
     sb.from('comprovantes').select('*, alunos(nome)').eq('status','pendente').order('enviado_em'),
     sb.rpc('alertas_saude'),
-    sb.from('profiles').select('id,nome,tel,role').order('nome')
+    sb.from('profiles').select('id,nome,tel,role').order('nome'),
+    sb.from('pagamentos').select('id,aluno_id,mes,valor').order('mes')
   ]);
-  D.eventos=ev.data||[];D.resp=rs.data||[];D.comps=cp.data||[];D.contas=ct.data||[];
+  D.eventos=ev.data||[];D.resp=rs.data||[];D.comps=cp.data||[];D.contas=ct.data||[];D.pagAll=pa.data||[];
   D.alertas={};(al.data||[]).forEach(x=>D.alertas[x.aluno_id]=x);
   const e=[a,p,l,v,cf,pr].find(r=>r.error&&r.status!==406);if(e)toast('Alguns dados não carregaram. Atualize a página.');
 }
@@ -713,22 +760,64 @@ function vJogos(){
   <h3 class="sec">Próximos</h3>${lista}`;
 }
 function vResumo(){
-  const now=new Date(),key=ymd(now).slice(0,7),mt=D.lanc.filter(x=>x.data.startsWith(key));
-  const ent=sum(mt,'in'),sai=sum(mt,'out'),ms=[];
-  for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1),k=ymd(d).slice(0,7),l=D.lanc.filter(x=>x.data.startsWith(k));
-    ms.push({l:d.toLocaleDateString('pt-BR',{month:'short'}).replace('.',''),i:sum(l,'in'),o:sum(l,'out')})}
-  const mx=Math.max(1,...ms.flatMap(m=>[m.i,m.o]));
-  const bars=ms.map((m,j)=>{const x=j*53+10,hi=m.i/mx*108,ho=m.o/mx*108;
-    return `<rect class="bi" x="${x}" y="${120-hi}" width="16" height="${hi}" rx="3"/><rect class="bo" x="${x+18}" y="${120-ho}" width="16" height="${ho}" rx="3"/><text x="${x+17}" y="136" text-anchor="middle">${m.l}</text>`}).join('');
+  if(!finMes)finMes=ymOf(new Date());
+  const seg=`<div class="seg"><button class="${finModo==='mes'?'on':''}" data-act="finmodo" data-id="mes">Mês</button><button class="${finModo==='ano'?'on':''}" data-act="finmodo" data-id="ano">Ano</button><button class="${finModo==='grade'?'on':''}" data-act="finmodo" data-id="grade">Mensalidades</button></div>`;
+  return seg+(finModo==='ano'?vFinAno():finModo==='grade'?vGrade():vFinMes());
+}
+function perNav(rotulo,podeAvancar){return `<div class="per"><button class="mini" data-act="finper" data-id="-1" aria-label="Anterior">‹</button><b>${rotulo}</b><button class="mini" data-act="finper" data-id="1" aria-label="Próximo" ${podeAvancar?'':'disabled'}>›</button></div>`}
+function cardMens(prev,rec,nAb,n,titulo,extra){
+  const falta=Math.max(0,prev-rec),pct=n?Math.round(nAb/n*100):0;
+  return `<div class="card"><h3>${titulo}</h3>${n?`<div class="row"><span>Previsto</span><b>${fmt(prev)}</b></div><div class="row"><span>Recebido</span><b class="in">${fmt(rec)}</b></div><div class="row"><span>Em aberto</span><b class="${falta?'out':''}">${fmt(falta)}</b></div><div class="hb" style="margin-top:10px"><i style="width:${prev?Math.min(100,rec/prev*100):0}%;background:var(--gr)"></i></div><p class="hint">${extra} ${pct}% em aberto.</p>`:'<p class="hint" style="margin:0">Nenhum aluno sendo cobrado neste período.</p>'}</div>`;
+}
+function vFinMes(){
+  const ym=finMes,cur=ymOf(new Date()),lt=D.lanc.filter(x=>String(x.data).startsWith(ym));
+  const ent=sum(lt,'in'),sai=sum(lt,'out'),m=mensal(ym),ms=[];
+  for(let i=5;i>=0;i--){const k=ymAdd(ym,-i),l=D.lanc.filter(x=>String(x.data).startsWith(k));ms.push({l:MESC[Number(k.slice(5))-1],i:sum(l,'in'),o:sum(l,'out')})}
   const total=sum(D.lanc,'in')-sum(D.lanc,'out');
-  const por={};D.lanc.filter(x=>x.tipo==='out').forEach(x=>por[x.categoria]=(por[x.categoria]||0)+Number(x.valor));
-  const to=Object.values(por).reduce((a,b)=>a+b,0)||1;
-  const gastos=Object.entries(por).sort((a,b)=>b[1]-a[1]).map(([c,v])=>`<div style="margin-top:12px"><div class="row" style="border:0;padding:0"><span>${esc(c)}</span><b>${fmt(v)}</b></div><div class="hb"><i style="width:${v/to*100}%"></i></div></div>`).join('')||'<p class="hint">Nenhuma saída lançada ainda.</p>';
-  return `<div class="grid3"><div class="k"><small>Entradas do mês</small><b class="in">${fmt(ent)}</b></div><div class="k"><small>Saídas do mês</small><b class="out">${fmt(sai)}</b></div><div class="k"><small>Saldo do mês</small><b>${fmt(ent-sai)}</b></div></div>
-  <div class="card"><h3>Fluxo de caixa</h3><p class="hint" style="margin:0 0 8px">Últimos 6 meses. Amarelo: entradas. Vermelho: saídas.</p>
-  <svg viewBox="0 0 320 142" width="100%" role="img" aria-label="Gráfico de entradas e saídas por mês">${bars}</svg>
-  <div class="row" style="border:0;padding-bottom:0"><span>Saldo acumulado</span><b class="${total<0?'out':'in'}">${fmt(total)}</b></div></div>
-  <div class="card"><h3>Para onde vai o dinheiro</h3>${gastos}</div>`;
+  const ab=m.abertos.map(s=>`<div class="row"><div><b>${esc(s.nome)}</b><small>${esc(s.profiles&&s.profiles.nome||'')}</small></div>${s.profiles&&s.profiles.tel?`<button class="mini" data-act="cobrarm" data-id="${s.id}">Cobrar</button>`:''}</div>`).join('');
+  return perNav(ymNome(ym),ym<cur)+`<div class="grid3" style="margin-top:8px"><div class="k"><small>Entradas</small><b class="in">${fmt(ent)}</b></div><div class="k"><small>Saídas</small><b class="out">${fmt(sai)}</b></div><div class="k"><small>Saldo</small><b>${fmt(ent-sai)}</b></div></div>`+
+    cardMens(m.prev,m.rec,m.abertos.length,m.n,'Mensalidades do mês',`${m.pagos} de ${m.n} alunos pagaram.`)+
+    (ab?`<div class="card"><h3>Ainda não pagaram</h3>${ab}</div>`:'')+
+    `<div class="card"><h3>Fluxo de caixa</h3><p class="hint" style="margin:0 0 8px">6 meses até ${MESN[Number(ym.slice(5))-1]}. Amarelo: entradas. Vermelho: saídas.</p>${chartBars(ms,'Entradas e saídas por mês')}<div class="row" style="border:0;padding-bottom:0"><span>Saldo acumulado (tudo)</span><b class="${total<0?'out':'in'}">${fmt(total)}</b></div></div>
+    <div class="card"><h3>De onde veio</h3>${porCat(lt,'in','Nenhuma entrada neste mês.')}</div>
+    <div class="card"><h3>Para onde foi</h3>${porCat(lt,'out','Nenhuma saída neste mês.')}</div>
+    <p class="hint">As mensalidades contam pelo mês a que se referem. Entradas e saídas contam pela data do lançamento no caixa.</p>`;
+}
+function vFinAno(){
+  const y=String(finAno),cur=ymOf(new Date()),lt=D.lanc.filter(x=>String(x.data).startsWith(y+'-'));
+  const ent=sum(lt,'in'),sai=sum(lt,'out'),ms=[];let prev=0,rec=0,nAb=0,n=0;const linhas=[];
+  for(let i=1;i<=12;i++){const k=y+'-'+pad(i),l=lt.filter(x=>String(x.data).startsWith(k));ms.push({l:MESC[i-1],i:sum(l,'in'),o:sum(l,'out')});
+    if(k<=cur){const m=mensal(k);if(m.n){prev+=m.prev;rec+=m.rec;nAb+=m.abertos.length;n+=m.n;
+      linhas.push(`<div class="row"><span style="text-transform:capitalize">${MESN[i-1]}</span><span style="text-align:right"><b>${fmt(m.rec)}</b> de ${fmt(m.prev)}${m.abertos.length?`<small class="out">${m.abertos.length} em aberto</small>`:'<small class="in">Tudo pago</small>'}</span></div>`)}}}
+  return perNav(y,y<cur.slice(0,4))+`<div class="grid3" style="margin-top:8px"><div class="k"><small>Entradas</small><b class="in">${fmt(ent)}</b></div><div class="k"><small>Saídas</small><b class="out">${fmt(sai)}</b></div><div class="k"><small>Saldo</small><b>${fmt(ent-sai)}</b></div></div>
+    <div class="card"><h3>Mês a mês</h3><p class="hint" style="margin:0 0 8px">Amarelo: entradas. Vermelho: saídas.</p>${chartBars(ms,'Entradas e saídas de '+y)}</div>`+
+    cardMens(prev,rec,nAb,n,'Mensalidades no ano',`Soma dos meses até agora: ${n-nAb} de ${n} mensalidades pagas.`)+
+    (linhas.length?`<div class="card"><h3>Mensalidades por mês</h3>${linhas.join('')}</div>`:'')+
+    `<div class="card"><h3>De onde veio</h3>${porCat(lt,'in','Nenhuma entrada neste ano.')}</div>
+    <div class="card"><h3>Para onde foi</h3>${porCat(lt,'out','Nenhuma saída neste ano.')}</div>`;
+}
+function vGrade(){
+  const y=String(finAno),cur=ymOf(new Date()),ate=y<cur.slice(0,4)?y+'-12':cur;
+  let ms=[];for(let i=1;i<=12;i++){const k=y+'-'+pad(i);if(k<=ate)ms.push(k)}
+  const alunos=D.alunos.slice().sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
+  const primeiro=ms.find(k=>alunos.some(s=>ativoEm(s,k)));
+  ms=primeiro?ms.filter(k=>k>=primeiro):ms.slice(-1);
+  if(!alunos.length)return perNav(y,false)+'<p class="hint">Nenhum aluno inscrito ainda.</p>';
+  const cel=(s,k)=>{const p=pagoEm(s.id,k),at=ativoEm(s,k),nmM=MESN[Number(k.slice(5))-1];
+    const c=p?'s':at?'n':'x',t=p?'✓':at?'!':'–',st=p?'pago':at?'em aberto':'antes de começar';
+    return `<td><button class="gc ${c}" data-act="gcel" data-id="${s.id}" data-m="${k}" aria-label="${esc(s.nome)}, ${nmM}: ${st}">${t}</button></td>`};
+  const rows=alunos.map(s=>{const dv=ms.filter(k=>ativoEm(s,k)&&!pagoEm(s.id,k)).length;
+    return `<tr><td class="nm">${esc(s.nome)}</td>${ms.map(k=>cel(s,k)).join('')}<td class="tot ${dv?'out':''}">${dv?fmt(dv*D.fee):'—'}</td></tr>`}).join('');
+  const rodape=`<tr><td class="nm" style="color:var(--mut)">Pagaram</td>${ms.map(k=>{const m=mensal(k);return `<td class="tot" style="padding-right:3px">${m.pagos}/${m.n}</td>`}).join('')}<td></td></tr>`;
+  const dev=alunos.map(s=>({s,d:devidos(s,cur)})).filter(x=>x.d.length).sort((a,b)=>b.d.length-a.d.length);
+  const lista=dev.map(({s,d})=>`<div class="row"><div><b>${esc(s.nome)}</b><small>${d.map(m=>MESC[Number(m.slice(5))-1]+(m.slice(0,4)!==cur.slice(0,4)?'/'+m.slice(2,4):'')).join(', ')} · ${fmt(d.length*D.fee)}</small></div>${s.profiles&&s.profiles.tel?`<button class="mini" data-act="cobrarm" data-id="${s.id}">Cobrar</button>`:''}</div>`).join('');
+  const totDev=dev.reduce((a,x)=>a+x.d.length,0);
+  return perNav(y,y<cur.slice(0,4))+
+    `<div class="grid3" style="margin-top:8px"><div class="k"><small>Em aberto</small><b class="${totDev?'out':'in'}">${fmt(totDev*D.fee)}</b></div><div class="k"><small>Mensalidades</small><b>${totDev}</b></div><div class="k"><small>Alunos devendo</small><b>${dev.length}</b></div></div>
+    <div class="gscroll"><table class="grade"><thead><tr><th class="nm">Aluno</th>${ms.map(k=>`<th>${MESC[Number(k.slice(5))-1]}</th>`).join('')}<th class="tot">Deve</th></tr></thead><tbody>${rows}${rodape}</tbody></table></div>
+    <div class="leg"><span><i style="background:var(--gr)"></i>Pago</span><span><i style="background:#3a1414;border:1.5px solid var(--rd)"></i>Em aberto</span><span><i style="border:1.5px solid var(--ln)"></i>Antes de começar</span></div>
+    <p class="hint">Toque num quadrado para marcar ou desmarcar o pagamento daquele mês. O traço é antes do aluno começar a pagar; tocando nele, você passa a cobrar a partir daquele mês.</p>
+    ${lista?`<div class="card"><h3>Quem está devendo</h3><p class="hint" style="margin:0">Contando todos os meses até agora.</p>${lista}</div>`:'<div class="card ok"><h3>Tudo em dia</h3><p class="hint" style="margin:0">Nenhuma mensalidade em aberto.</p></div>'}`;
 }
 const opts=l=>l.map(c=>`<option>${c}</option>`).join('');
 function vLanc(){
@@ -868,6 +957,23 @@ async function acao(d,btn){
   }
   else if(d.act==='verpais'){await loadPais();go('pais');renderPais()}
   else if(d.act==='verprof'){await loadProf();go('prof');renderProf()}
+  else if(d.act==='finmodo'){finModo=d.id;renderOwner('resumo')}
+  else if(d.act==='finper'){const cur=ymOf(new Date()),n=Number(d.id);if(finModo==='mes'){const k=ymAdd(finMes||cur,n);if(k<=cur)finMes=k}else{const a=finAno+n;if(a<=new Date().getFullYear())finAno=a}renderOwner('resumo')}
+  else if(d.act==='gcel'){
+    const s=D.alunos.find(x=>x.id===d.id);if(!s)return;
+    const k=d.m,mm=k+'-01',nm=ymNome(k),p=pagoEm(s.id,k);
+    if(p){if(!confirm(`Desmarcar o pagamento de ${s.nome} de ${nm}? O valor sai do caixa.`))return;
+      await guard(null,async()=>{const{error}=await sb.rpc('desmarcar_pago',{p_aluno:s.id,p_mes:mm});if(!fail(error)){await refreshOwner('resumo');toast('Pagamento desmarcado.')}})}
+    else if(ativoEm(s,k)){if(!confirm(`Marcar ${nm} de ${s.nome} como pago (${fmt(D.fee)})? O valor entra no caixa hoje.`))return;
+      await guard(null,async()=>{const{error}=await sb.rpc('marcar_pago',{p_aluno:s.id,p_mes:mm});if(!fail(error)){await refreshOwner('resumo');toast('Pagamento registrado.')}})}
+    else{if(!confirm(`${s.nome} é cobrado a partir de ${ymNome(desdeYm(s))}. Cobrar também a partir de ${nm}?`))return;
+      await guard(null,async()=>{const{error}=await sb.from('alunos').update({cobrar_desde:mm}).eq('id',s.id);if(!fail(error)){await refreshOwner('resumo');toast('Cobrança ajustada.')}})}
+  }
+  else if(d.act==='cobrarm'){
+    const s=D.alunos.find(x=>x.id===d.id);if(!s)return;
+    const dv=devidos(s,ymOf(new Date()));if(!dv.length){toast('Este aluno está em dia.');return}
+    window.open(wpp(s.profiles&&s.profiles.tel,msgCobranca(s,dv)),'_blank');
+  }
   else if(d.act==='profmodo'){profModo=d.id;renderProf()}
   else if(d.act==='avaliar'){await abrirAval(d.id,perfil&&perfil.role==='professor'?'prof':'ficha')}
   else if(d.act==='avalvolta'){await voltaAval()}
@@ -934,6 +1040,12 @@ document.addEventListener('click',e=>{
   else acao(d,t);
 });
 document.addEventListener('change',async e=>{
+  if(e.target.id==='cdesde'){
+    const id=e.target.dataset.id,v=e.target.value+'-01';
+    const{error}=await sb.from('alunos').update({cobrar_desde:v}).eq('id',id);
+    if(error){toast(traduz(error));return}
+    const a=D.alunos.find(x=>x.id===id);if(a)a.cobrar_desde=v;toast('Cobrança ajustada.');return;
+  }
   if(e.target.id==='f_foto'&&e.target.files[0]){
     try{fotoNova=await fotoDe(e.target.files[0]);const p=$('#f_prev');p.style.backgroundImage='url('+fotoNova+')';p.textContent=''}catch(_){fotoNova='';toast('Não foi possível usar essa foto. Escolha outra.')}
     return}
