@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7uUjSobQQomJIBtDWeCa+C6oBEqKRtPDbD9SkJqiAJA=' 'sha256-R6TZafP0tWvsl9dJCOSUoyC8EGS5xCDFSuvvLrQgYnw=' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src https://ihiaoaorhyefhysqgadr.supabase.co wss://ihiaoaorhyefhysqgadr.supabase.co; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7uUjSobQQomJIBtDWeCa+C6oBEqKRtPDbD9SkJqiAJA=' 'sha256-jGVhKKWDaX3uW0f/x66xZQ0W/S3GTETbSw5J1UPXAcM=' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src https://ihiaoaorhyefhysqgadr.supabase.co wss://ihiaoaorhyefhysqgadr.supabase.co; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Escolinha Peñarol</title>
@@ -944,24 +944,29 @@ async function subirNota(file){
 }
 const convite=()=>`⚽🖤💛 *ESCOLINHA PEÑAROL – SAPIRANGA/RS* 💛🖤⚽
 
-Olá, responsável! A inscrição do seu filho agora é pelo nosso aplicativo. 🎉
+Olá, responsável! A inscrição e o pagamento agora são pelo nosso aplicativo. 🎉
 
-📲 *Acesse pelo link:*
-${location.origin+location.pathname}
+📲 *Acesse:* ${location.origin+location.pathname}
 
-*Como fazer:*
+*Inscrição*
 1️⃣ Toque em *Entrar como Aluno* e depois em *Criar minha conta*
 2️⃣ Confirme seu e-mail (olhe também no spam)
-3️⃣ Entre no app e preencha a *ficha de inscrição* do atleta. Se quiser, coloque a foto dele(a)
+3️⃣ Entre e preencha a *ficha de inscrição*. Se quiser, coloque a foto do atleta
 4️⃣ Pronto! O app mostra a categoria, o dia e o horário do treino
 
-🕒 *Horários de treino*
+💰 *Mensalidade*
+• Toque em *Copiar PIX copia e cola* (o valor já vem preenchido)
+• Cole no app do seu banco, em *PIX Copia e Cola*, e pague
+• Volte ao app e toque em *Enviar comprovante*
+
+🔔 *Avisos e jogos*
+• Toque em *Ativar avisos no celular* para receber convocações e recados
+• Quando houver jogo, responda no app se o atleta *vai* ou *não vai*
+• No iPhone: abra o link no Safari, toque em *Compartilhar* > *Adicionar à Tela de Início*, abra pelo ícone e ative os avisos
+
+🕒 *Horários*
 • ${CATS.menores.nome}: segunda ${CATS.menores.h[0][1]} e sábado ${CATS.menores.h[1][1]}
 • ${CATS.maiores.nome}: segunda ${CATS.maiores.h[0][1]} e sábado ${CATS.maiores.h[1][1]}
-
-No app você também acompanha os avisos, vê o valor da mensalidade e a chave PIX.
-
-💡 Dica: abra o link no celular e toque em *Compartilhar > Adicionar à Tela de Início*.
 
 *Disciplina, respeito e união: essa é a nossa missão!*
 #SomosPeñarol 💛🖤`;
