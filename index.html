@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7uUjSobQQomJIBtDWeCa+C6oBEqKRtPDbD9SkJqiAJA=' 'sha256-DCuf6IZCYoannb4q0Pu3SD0L2yVTYTBCE0DJbN/NeQ8=' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src https://ihiaoaorhyefhysqgadr.supabase.co wss://ihiaoaorhyefhysqgadr.supabase.co; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7uUjSobQQomJIBtDWeCa+C6oBEqKRtPDbD9SkJqiAJA=' 'sha256-T3pYjWQ62dGt4c5OkIfDwmSTVNaUH09E6OCNkwc4elA=' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src https://ihiaoaorhyefhysqgadr.supabase.co wss://ihiaoaorhyefhysqgadr.supabase.co; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Escolinha Peñarol</title>
@@ -864,9 +864,159 @@ function csvGrade(){
   return csvLinhas(L);
 }
 async function baixar(nome,txt,tipo){
-  const blob=new Blob([txt],{type:tipo});
+  const blob=txt instanceof Blob?txt:new Blob([txt],{type:tipo});
   try{const f=new File([blob],nome,{type:tipo});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:nome});return}}catch(e){if(e&&e.name==='AbortError')return}
   const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=nome;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000);
+}
+function relDados(){
+  const cur=ymOf(new Date());
+  if(finModo==='ano'){
+    const y=String(finAno),lt=D.lanc.filter(x=>String(x.data).startsWith(y+'-')),ms=[];let prev=0,rec=0,nAb=0,n=0;
+    for(let i=1;i<=12;i++){const k=y+'-'+pad(i),l=lt.filter(x=>String(x.data).startsWith(k));ms.push({l:MESC[i-1],i:sum(l,'in'),o:sum(l,'out')});
+      if(k<=cur){const m=mensal(k);if(m.n){prev+=m.prev;rec+=m.rec;nAb+=m.abertos.length;n+=m.n}}}
+    return {per:'Ano de '+y,arq:'financeiro-'+y,lt,ms,chart:'Mês a mês',mens:{t:'Mensalidades no ano',prev,rec,n,txt:`${n-nAb} de ${n} mensalidades pagas`}};
+  }
+  const ym=finMes,lt=D.lanc.filter(x=>String(x.data).startsWith(ym)),m=mensal(ym),ms=[];
+  for(let i=5;i>=0;i--){const k=ymAdd(ym,-i),l=D.lanc.filter(x=>String(x.data).startsWith(k));ms.push({l:MESC[Number(k.slice(5))-1],i:sum(l,'in'),o:sum(l,'out')})}
+  const nm=ymNome(ym);
+  return {per:nm.charAt(0).toUpperCase()+nm.slice(1),arq:'financeiro-'+ym,lt,ms,chart:'Últimos 6 meses',mens:{t:'Mensalidades do mês',prev:m.prev,rec:m.rec,n:m.n,txt:`${m.pagos} de ${m.n} alunos pagaram`}};
+}
+function relGrupos(l,tipo){
+  const por={};l.filter(x=>x.tipo===tipo).forEach(x=>{const c=grupoLanc(x);por[c]=(por[c]||0)+Number(x.valor)});
+  let e=Object.entries(por).sort((a,b)=>b[1]-a[1]);
+  if(e.length>8){const r=e.slice(7).reduce((a,x)=>a+x[1],0);e=e.slice(0,7).concat([['Outros',r]])}
+  return e;
+}
+// base comum: tela preta, escudo, título e período
+function relBase(H,titulo,per){
+  const C={bk:'#0a0a0a',c:'#151515',ln:'#2d2b27',ye:'#f7b500',wh:'#f5f2ea',mu:'#a09a8d',rd:'#ef5b5b',gr:'#4cc38a',b3:'#232220'};
+  const W=1080,P=56,IW=W-2*P,cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');
+  const rr=(X,Y,w,h,r,f,st)=>{r=Math.min(r,w/2,h/2);x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+w,Y,X+w,Y+h,r);x.arcTo(X+w,Y+h,X,Y+h,r);x.arcTo(X,Y+h,X,Y,r);x.arcTo(X,Y,X+w,Y,r);x.closePath();if(f){x.fillStyle=f;x.fill()}if(st){x.strokeStyle=st;x.lineWidth=2;x.stroke()}};
+  const T=(t,X,Y,font,cor,al)=>{x.font=font;x.fillStyle=cor;x.textAlign=al||'left';x.textBaseline='alphabetic';x.fillText(t,X,Y)};
+  const corta=(t,font,max)=>{x.font=font;t=String(t);if(x.measureText(t).width<=max)return t;while(t.length>1&&x.measureText(t+'…').width>max)t=t.slice(0,-1);return t+'…'};
+  const caixas=(y,l)=>{const bw=(IW-2*20)/3;l.forEach(([r,v,c],i)=>{const X=P+i*(bw+20);rr(X,y,bw,150,18,C.c,C.ln);T(r,X+24,y+52,'600 28px Barlow',C.mu);T(corta(v,'700 38px Barlow',bw-40),X+24,y+112,'700 38px Barlow',c)})};
+  x.fillStyle=C.bk;x.fillRect(0,0,W,H);
+  const eImg=document.querySelector('.bar img');let tx=P;
+  if(eImg&&eImg.complete&&eImg.naturalWidth){x.save();x.beginPath();x.arc(P+60,125,60,0,Math.PI*2);x.clip();x.drawImage(eImg,P,65,120,120);x.restore();tx=P+150}
+  T('ESCOLINHA PEÑAROL',tx,112,'48px Anton',C.wh);
+  T(corta(titulo+' · '+per,'600 32px Barlow',W-P-tx),tx,160,'600 32px Barlow',C.ye);
+  x.fillStyle=C.ye;x.fillRect(P,214,IW,4);
+  T('Gerado pelo app da Escolinha Peñarol em '+br(today()),W/2,H-50,'600 24px Barlow',C.mu,'center');
+  return {x,cv,C,W,P,IW,rr,T,corta,caixas};
+}
+async function relFontes(){try{await Promise.all(['40px Anton','600 30px Barlow','700 30px Barlow'].map(f=>document.fonts.load(f)))}catch(_){}}
+function relFin(){
+  const R=relDados(),gi=relGrupos(R.lt,'in'),go=relGrupos(R.lt,'out'),ent=sum(R.lt,'in'),sai=sum(R.lt,'out');
+  const hG=n=>n?104+n*84:140;
+  const H=250+190+(R.mens.n?300:0)+460+hG(gi.length)+40+hG(go.length)+40+80;
+  const {x,cv,C,P,IW,rr,T,corta,caixas}=relBase(H,'Relatório financeiro',R.per);
+  let y=250;
+  caixas(y,[['Entradas',fmt(ent),C.gr],['Saídas',fmt(sai),C.rd],['Saldo',fmt(ent-sai),ent-sai<0?C.rd:C.wh]]);
+  y+=190;
+  if(R.mens.n){const m=R.mens,f=Math.max(0,m.prev-m.rec);rr(P,y,IW,260,18,C.c,C.ln);
+    T(m.t.toUpperCase(),P+28,y+58,'34px Anton',C.wh);
+    [['Previsto',fmt(m.prev),C.wh],['Recebido',fmt(m.rec),C.gr],['Em aberto',fmt(f),f?C.rd:C.wh]].forEach(([l,v,c],i)=>{const X=P+28+i*((IW-56)/3);T(l,X,y+112,'600 26px Barlow',C.mu);T(v,X,y+152,'700 32px Barlow',c)});
+    rr(P+28,y+184,IW-56,16,8,C.b3);if(m.prev&&m.rec)rr(P+28,y+184,Math.max(16,(IW-56)*Math.min(1,m.rec/m.prev)),16,8,C.gr);
+    T(m.txt,P+28,y+238,'600 26px Barlow',C.mu);y+=300}
+  rr(P,y,IW,420,18,C.c,C.ln);T(R.chart.toUpperCase(),P+28,y+58,'34px Anton',C.wh);
+  x.fillStyle=C.ye;x.fillRect(IW+P-330,y+36,22,22);T('Entradas',IW+P-300,y+56,'600 24px Barlow',C.mu);x.fillStyle=C.rd;x.fillRect(IW+P-165,y+36,22,22);T('Saídas',IW+P-135,y+56,'600 24px Barlow',C.mu);
+  const n=R.ms.length,cx=P+28,cw=IW-56,base=y+360,ch=250,gw=cw/n,bb=Math.min(34,(gw-14)/2),mx=Math.max(1,...R.ms.flatMap(m=>[m.i,m.o]));
+  x.fillStyle=C.ln;x.fillRect(cx,base,cw,2);
+  R.ms.forEach((m,j)=>{const X=cx+j*gw+(gw-2*bb-6)/2,hi=m.i/mx*ch,ho=m.o/mx*ch;
+    if(hi>0)rr(X,base-hi,bb,hi,6,C.ye);if(ho>0)rr(X+bb+6,base-ho,bb,ho,6,C.rd);
+    T(m.l,cx+j*gw+gw/2,base+40,'600 '+(n>6?22:26)+'px Barlow',C.mu,'center')});
+  y+=460;
+  const grupo=(tit,e,cor,vazio)=>{const h=hG(e.length);rr(P,y,IW,h,18,C.c,C.ln);T(tit,P+28,y+58,'34px Anton',C.wh);
+    if(!e.length)T(vazio,P+28,y+110,'600 26px Barlow',C.mu);
+    const to=e.reduce((a,v)=>a+v[1],0)||1;
+    e.forEach(([c,v],i)=>{const Y=y+92+i*84,val=fmt(v);x.font='700 28px Barlow';const vw=x.measureText(val).width;
+      T(corta(c,'600 28px Barlow',IW-56-vw-24),P+28,Y+30,'600 28px Barlow',C.wh);T(val,P+IW-28,Y+30,'700 28px Barlow',C.wh,'right');
+      rr(P+28,Y+46,IW-56,12,6,C.b3);rr(P+28,Y+46,Math.max(12,(IW-56)*v/to),12,6,cor)});
+    y+=h+40};
+  grupo('DE ONDE VEIO',gi,C.ye,'Nenhuma entrada no período.');
+  grupo('PARA ONDE FOI',go,C.rd,'Nenhuma saída no período.');
+  return {cv,per:R.per,arq:R.arq,tit:'Relatório'};
+}
+function relGrade(){
+  const y0=String(finAno),cur=ymOf(new Date()),ate=y0<cur.slice(0,4)?y0+'-12':cur;
+  let ms=[];for(let i=1;i<=12;i++){const k=y0+'-'+pad(i);if(k<=ate)ms.push(k)}
+  const alunos=D.alunos.slice().sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
+  const primeiro=ms.find(k=>alunos.some(s=>ativoEm(s,k)));ms=primeiro?ms.filter(k=>k>=primeiro):ms.slice(-1);
+  const lin=alunos.filter(s=>ms.some(k=>ativoEm(s,k)));
+  const dev=alunos.map(s=>({s,d:devidos(s,cur)})).filter(v=>v.d.length).sort((a,b)=>b.d.length-a.d.length);
+  const totDev=dev.reduce((a,v)=>a+v.d.length,0),RH=62;
+  const hT=110+(lin.length+1)*RH+30,hL=dev.length?110+dev.length*84:150;
+  const H=250+190+hT+40+70+hL+40+80;
+  const {x,cv,C,P,IW,rr,T,corta,caixas}=relBase(H,'Mensalidades',y0);
+  let y=250;
+  caixas(y,[['Em aberto',fmt(totDev*D.fee),totDev?C.rd:C.gr],['Mensalidades',String(totDev),C.wh],['Alunos devendo',String(dev.length),C.wh]]);
+  y+=190;
+  rr(P,y,IW,hT,18,C.c,C.ln);
+  const nw=280,dw=150,cx=P+28+nw,cw=IW-56-nw-dw,cs=cw/ms.length,bs=Math.min(54,cs-8),fs=ms.length>8?22:26;
+  T('Aluno',P+28,y+60,'700 24px Barlow',C.mu);ms.forEach((k,i)=>T(MESC[Number(k.slice(5))-1],cx+i*cs+cs/2,y+60,'700 '+fs+'px Barlow',C.mu,'center'));T('Deve',P+IW-28,y+60,'700 24px Barlow',C.mu,'right');
+  x.fillStyle=C.ln;x.fillRect(P+28,y+84,IW-56,2);
+  let ry=y+100;
+  lin.forEach(s=>{const d=ms.filter(k=>ativoEm(s,k)&&!pagoEm(s.id,k)).length;
+    T(corta(s.nome+(saiu(s)?' (saiu)':''),'600 26px Barlow',nw-16),P+28,ry+38,'600 26px Barlow',C.wh);
+    ms.forEach((k,i)=>{const p=pagoEm(s.id,k),at=ativoEm(s,k),X=cx+i*cs+(cs-bs)/2,Y=ry+(RH-bs)/2-4;
+      if(p){rr(X,Y,bs,bs,10,C.gr);T(p.forma==='dinheiro'?'$':'✓',X+bs/2,Y+bs/2+10,'700 28px Barlow',C.bk,'center')}
+      else if(at){rr(X,Y,bs,bs,10,'#3a1414',C.rd);T('!',X+bs/2,Y+bs/2+10,'700 28px Barlow',C.rd,'center')}
+      else{rr(X,Y,bs,bs,10,null,C.ln);T('–',X+bs/2,Y+bs/2+9,'600 26px Barlow',C.mu,'center')}});
+    T(d?fmt(d*D.fee):'—',P+IW-28,ry+38,'700 24px Barlow',d?C.rd:C.mu,'right');ry+=RH});
+  T('Pagaram',P+28,ry+38,'600 24px Barlow',C.mu);
+  ms.forEach((k,i)=>{const m=mensal(k);T(m.pagos+'/'+m.n,cx+i*cs+cs/2,ry+38,'700 '+(fs-2)+'px Barlow',C.mu,'center')});
+  y+=hT+40;
+  [['Pago (✓ PIX, $ dinheiro)',C.gr,null],['Em aberto','#3a1414',C.rd],['Antes de começar',null,C.ln]].reduce((X,[t,f,st])=>{rr(X,y+8,30,30,8,f,st);T(t,X+42,y+32,'600 24px Barlow',C.mu);x.font='600 24px Barlow';return X+42+x.measureText(t).width+36},P);
+  y+=70;
+  rr(P,y,IW,hL,18,dev.length?C.c:'#10261c',dev.length?C.ln:C.gr);
+  if(dev.length){T('QUEM ESTÁ DEVENDO',P+28,y+58,'34px Anton',C.wh);
+    dev.forEach(({s,d},i)=>{const Y=y+92+i*84;const v=fmt(d.length*D.fee);x.font='700 28px Barlow';const vw=x.measureText(v).width;
+      T(corta(s.nome,'700 28px Barlow',IW-56-vw-24),P+28,Y+30,'700 28px Barlow',C.wh);T(v,P+IW-28,Y+30,'700 28px Barlow',C.rd,'right');
+      T(corta(d.map(m=>MESC[Number(m.slice(5))-1]+(m.slice(0,4)!==cur.slice(0,4)?'/'+m.slice(2,4):'')).join(', '),'600 24px Barlow',IW-56),P+28,Y+64,'600 24px Barlow',C.mu)})}
+  else{T('TUDO EM DIA',P+28,y+58,'34px Anton',C.wh);T('Nenhuma mensalidade em aberto.',P+28,y+104,'600 26px Barlow',C.mu)}
+  return {cv,per:y0,arq:'mensalidades-'+y0,tit:'Mensalidades'};
+}
+function relPatro(){
+  const ps=(D.patros||[]).filter(p=>p.ativo).slice().sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
+  const comb=ps.reduce((a,p)=>a+Number(p.combinado),0),rec=ps.reduce((a,p)=>a+patroRec(p.id),0),falta=Math.max(0,comb-rec);
+  const quit=ps.filter(p=>Number(p.combinado)>0&&patroRec(p.id)>=Number(p.combinado)).length;
+  const hL=ps.length?100+ps.length*128:150;
+  const H=250+190+380+40+hL+40+80;
+  const per='atualizado em '+br(today());
+  const {x,cv,C,P,IW,rr,T,corta,caixas}=relBase(H,'Patrocínios',per);
+  let y=250;
+  caixas(y,[['Combinado',fmt(comb),C.wh],['Recebido',fmt(rec),C.gr],['Falta',fmt(falta),C.ye]]);
+  y+=190;
+  // andamento: rosca + legenda
+  rr(P,y,IW,380,18,C.c,C.ln);T('ANDAMENTO',P+28,y+58,'34px Anton',C.wh);
+  const cx=P+190,cy=y+220,r=120,pct=comb?Math.min(1,rec/comb):0;
+  x.lineWidth=44;x.lineCap='butt';x.strokeStyle=C.b3;x.beginPath();x.arc(cx,cy,r,0,Math.PI*2);x.stroke();
+  if(pct>0){x.strokeStyle=C.gr;x.beginPath();x.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2*pct);x.stroke()}
+  T(Math.round(pct*100)+'%',cx,cy+12,'56px Anton',C.wh,'center');T('recebido',cx,cy+50,'600 24px Barlow',C.mu,'center');
+  const lx=P+380;
+  [['Recebido',fmt(rec),C.gr],['Falta receber',fmt(falta),C.b3]].forEach(([t,v,c],i)=>{const Y=y+140+i*90;rr(lx,Y-26,30,30,8,c,c===C.b3?C.ln:null);T(t,lx+46,Y,'600 26px Barlow',C.mu);T(v,lx+46,Y+40,'700 34px Barlow',i?C.ye:C.gr)});
+  T(`${quit} de ${ps.length} patrocinador${ps.length===1?'':'es'} quitado${ps.length===1?'':'s'}`,lx,y+340,'600 26px Barlow',C.mu);
+  y+=420;
+  rr(P,y,IW,hL,18,C.c,C.ln);T('POR PATROCINADOR',P+28,y+58,'34px Anton',C.wh);
+  if(!ps.length)T('Nenhum patrocinador cadastrado.',P+28,y+110,'600 26px Barlow',C.mu);
+  ps.forEach((p,i)=>{const Y=y+92+i*128,c=Number(p.combinado),r2=patroRec(p.id),f=Math.max(0,c-r2),q=c>0&&f<=0;
+    let dir=q?'Quitado':'Falta '+fmt(f);x.font='700 26px Barlow';const dw=x.measureText(dir).width+(q?32:0);
+    T(corta(p.nome,'700 28px Barlow',IW-56-dw-24),P+28,Y+30,'700 28px Barlow',C.wh);
+    if(q){rr(P+IW-28-dw,Y+2,dw,38,10,C.gr);T(dir,P+IW-28-dw/2,Y+30,'700 26px Barlow',C.bk,'center')}else T(dir,P+IW-28,Y+30,'700 26px Barlow',C.ye,'right');
+    rr(P+28,Y+50,IW-56,14,7,C.b3);if(c&&r2)rr(P+28,Y+50,Math.max(14,(IW-56)*Math.min(1,r2/c)),14,7,C.ye);
+    T('Recebido '+fmt(r2)+' de '+fmt(c),P+28,Y+94,'600 24px Barlow',C.mu)});
+  return {cv,per:'Patrocínios',arq:'patrocinios-'+today(),tit:'Patrocínios'};
+}
+async function abrirRelatorio(tipo){
+  await relFontes();
+  const R=tipo==='patro'?relPatro():finModo==='grade'?relGrade():relFin();
+  const png=await new Promise(r=>R.cv.toBlob(r,'image/png'));
+  const url=URL.createObjectURL(png),o=document.createElement('div');o.className='modal';
+  o.innerHTML=`<div class="sheet" role="dialog" aria-modal="true" aria-label="Imagem para enviar" style="max-height:92vh;overflow:auto"><h3>${esc(R.tit)}${R.per!==R.tit?' · '+esc(R.per):''}</h3><p class="hint" style="margin:0 0 10px">É assim que os outros vão ver.</p><img src="${url}" alt="Imagem de ${esc(R.tit)}" style="width:100%;border-radius:12px;border:1px solid var(--ln)"><button class="btn p" data-r="png">Enviar ou salvar imagem</button><button class="btn" data-r="">Fechar</button></div>`;
+  o.addEventListener('click',async e=>{const b=e.target.closest('[data-r]');if(!b&&e.target!==o)return;e.stopPropagation();
+    if(!b||!b.dataset.r){o.remove();URL.revokeObjectURL(url);return}
+    await baixar(R.arq+'.png',png,'image/png')});
+  document.body.appendChild(o);
 }
 const TAB_COPIA=['alunos','fichas','profiles','pagamentos','lancamentos','comprovantes','avisos','eventos','respostas','presencas','avaliacoes','config','patrocinadores','patrocinio_pagamentos'];
 async function copiaSeguranca(){
@@ -896,7 +1046,7 @@ function vFinMes(){
     `<div class="card"><h3>Fluxo de caixa</h3><p class="hint" style="margin:0 0 8px">6 meses até ${MESN[Number(ym.slice(5))-1]}. Amarelo: entradas. Vermelho: saídas.</p>${chartBars(ms,'Entradas e saídas por mês')}<div class="row" style="border:0;padding-bottom:0"><span>Saldo acumulado (tudo)</span><b class="${total<0?'out':'in'}">${fmt(total)}</b></div></div>
     <div class="card"><h3>De onde veio</h3>${porCat(lt,'in','Nenhuma entrada neste mês.')}</div>
     <div class="card"><h3>Para onde foi</h3>${porCat(lt,'out','Nenhuma saída neste mês.')}</div>
-    <p class="hint">As mensalidades contam pelo mês a que se referem. Entradas e saídas contam pela data do lançamento no caixa.</p><button class="btn" data-act="csvfin">Baixar planilha de ${MESN[Number(ym.slice(5))-1]}</button>`;
+    <p class="hint">As mensalidades contam pelo mês a que se referem. Entradas e saídas contam pela data do lançamento no caixa.</p><button class="btn p" data-act="relimg">Baixar imagem de ${MESN[Number(ym.slice(5))-1]}</button>`;
 }
 function vFinAno(){
   const y=String(finAno),cur=ymOf(new Date()),lt=D.lanc.filter(x=>String(x.data).startsWith(y+'-'));
@@ -909,7 +1059,7 @@ function vFinAno(){
     cardMens(prev,rec,nAb,n,'Mensalidades no ano',`Soma dos meses até agora: ${n-nAb} de ${n} mensalidades pagas.`)+
     (linhas.length?`<div class="card"><h3>Mensalidades por mês</h3>${linhas.join('')}</div>`:'')+
     `<div class="card"><h3>De onde veio</h3>${porCat(lt,'in','Nenhuma entrada neste ano.')}</div>
-    <div class="card"><h3>Para onde foi</h3>${porCat(lt,'out','Nenhuma saída neste ano.')}</div><button class="btn" data-act="csvfin">Baixar planilha de ${y}</button>`;
+    <div class="card"><h3>Para onde foi</h3>${porCat(lt,'out','Nenhuma saída neste ano.')}</div><button class="btn p" data-act="relimg">Baixar imagem de ${y}</button>`;
 }
 function vGrade(){
   const y=String(finAno),cur=ymOf(new Date()),ate=y<cur.slice(0,4)?y+'-12':cur;
@@ -932,7 +1082,7 @@ function vGrade(){
     <div class="gscroll"><table class="grade"><thead><tr><th class="nm">Aluno</th>${ms.map(k=>`<th>${MESC[Number(k.slice(5))-1]}</th>`).join('')}<th class="tot">Deve</th></tr></thead><tbody>${rows}${rodape}</tbody></table></div>
     <div class="leg"><span><i style="background:var(--gr)"></i>Pago (✓ PIX, $ dinheiro)</span><span><i style="background:#3a1414;border:1.5px solid var(--rd)"></i>Em aberto</span><span><i style="border:1.5px solid var(--ln)"></i>Antes de começar</span></div>
     <p class="hint">Toque num quadrado para marcar ou desmarcar o pagamento daquele mês. O traço é antes do aluno começar a pagar; tocando nele, você passa a cobrar a partir daquele mês.</p>
-    ${lista?`<div class="card"><h3>Quem está devendo</h3><p class="hint" style="margin:0">Contando todos os meses até agora.</p>${lista}</div>`:'<div class="card ok"><h3>Tudo em dia</h3><p class="hint" style="margin:0">Nenhuma mensalidade em aberto.</p></div>'}<button class="btn" data-act="csvfin">Baixar grade em planilha</button>`;
+    ${lista?`<div class="card"><h3>Quem está devendo</h3><p class="hint" style="margin:0">Contando todos os meses até agora.</p>${lista}</div>`:'<div class="card ok"><h3>Tudo em dia</h3><p class="hint" style="margin:0">Nenhuma mensalidade em aberto.</p></div>'}<button class="btn p" data-act="relimg">Baixar imagem da grade</button>`;
 }
 const opts=l=>l.map(c=>`<option>${c}</option>`).join('');
 let lancEdit=null;
@@ -990,7 +1140,7 @@ function vPatro(){
   return `<div class="grid3" style="margin-top:0;grid-template-columns:repeat(3,minmax(0,1fr))"><div class="k"><small>Combinado</small><b style="${kb}">${fmt(comb)}</b></div><div class="k"><small>Recebido</small><b class="in" style="${kb}">${fmt(rec)}</b></div><div class="k"><small>Falta</small><b style="${kb};color:var(--ye)">${fmt(Math.max(0,comb-rec))}</b></div></div>`+
     form+at.map(card).join('')+(at.length||form?'':'<div class="card"><p class="hint" style="margin:0">Nenhum patrocinador ainda. Cadastre o primeiro e registre os pagamentos aqui. Cada pagamento entra sozinho em Entradas.</p></div>')+
     (form?'':'<button class="btn" data-act="patronovo" style="border-style:dashed;color:var(--ye);border-color:var(--ye)">+ Novo patrocinador</button>')+
-    ps.filter(p=>!p.ativo).map(card).join('')+'<p class="hint">Cada pagamento registrado aqui entra sozinho em Entradas.</p>';
+    ps.filter(p=>!p.ativo).map(card).join('')+'<p class="hint">Cada pagamento registrado aqui entra sozinho em Entradas.</p>'+(at.length?'<button class="btn p" data-act="relimg" data-id="patro">Baixar imagem dos patrocínios</button>':'');
 }
 async function subirNota(file){
   let blob,ext,type;
@@ -1154,11 +1304,7 @@ async function acao(d,btn){
     if(!confirm(`${s.nome} voltou para a escolinha? Ele volta para a chamada e a cobrança continua.`))return;
     await guard(btn,async()=>{const{error}=await sb.from('alunos').update({cobrar_ate:null}).eq('id',s.id);if(fail(error))return;await loadOwner();toast('Aluno de volta.');verFicha(s.id)});
   }
-  else if(d.act==='csvfin'){
-    if(finModo==='grade')await baixar(`mensalidades-${finAno}.csv`,csvGrade(),'text/csv');
-    else if(finModo==='ano')await baixar(`financeiro-${finAno}.csv`,csvPeriodo(String(finAno)),'text/csv');
-    else await baixar(`financeiro-${finMes}.csv`,csvPeriodo(finMes),'text/csv');
-  }
+  else if(d.act==='relimg'){await guard(btn,async()=>{try{await abrirRelatorio(d.id)}catch(_){toast('Não foi possível gerar a imagem.')}})}
   else if(d.act==='copia'){
     await guard(btn,async()=>{try{const txt=await copiaSeguranca();await baixar(`copia-penarol-${today()}.json`,txt,'application/json');try{localStorage.setItem('penarol_copia',today())}catch(_){}toast('Cópia gerada.')}catch(_){toast('Não foi possível gerar a cópia. Tente de novo.')}});
   }
