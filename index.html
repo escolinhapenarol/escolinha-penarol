@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7uUjSobQQomJIBtDWeCa+C6oBEqKRtPDbD9SkJqiAJA=' 'sha256-m+brulnZFjSf3wlQaFmSDNfwIzfIp8IH/iUR59eirk0=' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src https://ihiaoaorhyefhysqgadr.supabase.co wss://ihiaoaorhyefhysqgadr.supabase.co; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7uUjSobQQomJIBtDWeCa+C6oBEqKRtPDbD9SkJqiAJA=' 'sha256-bCg1iwyPoYryIUnPzoOB5hPhNhShA/ZA/YYg+SjlA7E=' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src https://ihiaoaorhyefhysqgadr.supabase.co wss://ihiaoaorhyefhysqgadr.supabase.co; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Escolinha Peñarol</title>
@@ -101,6 +101,10 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
 .st{font:700 12.5px 'Barlow',sans-serif;border-radius:999px;padding:3px 10px;white-space:nowrap}.st.s{background:var(--gr);color:#0a0a0a}.st.n{background:var(--rd);color:#0a0a0a}.st.p{background:var(--bk3);color:var(--wh)}
 .mini{background:none;border:1.5px solid var(--ln);color:var(--wh);border-radius:10px;padding:8px 12px;font:700 13px 'Barlow',sans-serif;cursor:pointer;white-space:nowrap}.mini.ok{background:var(--gr);border-color:var(--gr);color:#0a0a0a}
 input[type=time]{display:block;min-width:0;max-width:100%;-webkit-appearance:none;appearance:none;min-height:49px;text-align:left}
+.nota{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:4px}
+.nota button{padding:11px 0;border-radius:10px;border:1.5px solid var(--ln);background:var(--bk2);color:var(--wh);font:700 16px 'Barlow',sans-serif;cursor:pointer}
+.nota button.on{background:var(--ye);border-color:var(--ye);color:#0a0a0a}
+.seg5{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:6px}.seg5 i{height:9px;border-radius:5px;background:var(--bk3)}.seg5 i.on{background:var(--ye)}
 .fbtn{display:inline-block;margin-top:6px;background:none;border:1.5px solid var(--ye);color:var(--ye);border-radius:999px;padding:6px 14px;font:700 13px 'Barlow',sans-serif;cursor:pointer}
 @media print{.banner{display:none!important}.av{border-color:#000!important;color:#000!important}}
 </style>
@@ -205,7 +209,7 @@ input[type=time]{display:block;min-width:0;max-width:100%;-webkit-appearance:non
   <div class="wrap">
     <h3 class="sec">Política de privacidade</h3>
     <p class="hint">Escolinha Peñarol (Associação Peñarol Sapiranga), Sapiranga/RS. Seguimos a Lei Geral de Proteção de Dados (Lei 13.709/2018).</p>
-    <div class="card"><h3>Quais dados guardamos</h3><p class="hint" style="margin:0"><b>Do responsável:</b> nome, WhatsApp, e-mail, CPF, parentesco e telefone de emergência.<br><b>Do atleta:</b> nome, data de nascimento, documento (opcional), endereço, escola, tamanho de camiseta, foto (opcional) e informações de saúde informadas na ficha (alergias, medicamentos e restrições).<br><b>Pagamentos:</b> comprovantes de PIX enviados pelo app.</p></div>
+    <div class="card"><h3>Quais dados guardamos</h3><p class="hint" style="margin:0"><b>Do responsável:</b> nome, WhatsApp, e-mail, CPF, parentesco e telefone de emergência.<br><b>Do atleta:</b> nome, data de nascimento, documento (opcional), endereço, escola, tamanho de camiseta, foto (opcional) e informações de saúde informadas na ficha (alergias, medicamentos e restrições).<br><b>Pagamentos:</b> comprovantes de PIX enviados pelo app.<br><b>Treinos:</b> presença nos treinos e avaliação de desempenho feita pelos professores.</p></div>
     <div class="card"><h3>Para que usamos</h3><p class="hint" style="margin:0">Para fazer a inscrição, definir a categoria e o horário, registrar presença, controlar mensalidades, enviar avisos e cuidar da segurança do atleta nos treinos, por exemplo numa emergência. Não usamos os dados para nenhuma outra finalidade.</p></div>
     <div class="card"><h3>Quem pode ver</h3><p class="hint" style="margin:0">Só a administração da escolinha e o próprio responsável. Os professores veem apenas o nome do atleta e os cuidados de saúde informados na ficha (alergias, medicamentos e restrições), para a segurança no treino. Cada responsável vê apenas os dados dos próprios filhos. Comprovantes de pagamento ficam guardados de forma privada e só a administração abre. Não vendemos nem repassamos dados a ninguém. Os dados ficam guardados com proteção de acesso no serviço de banco de dados Supabase.</p></div>
     <div class="card"><h3>Fotos e imagem</h3><p class="hint" style="margin:0">A foto do cadastro aparece só dentro do app. Fotos e vídeos dos treinos só são divulgados quando o responsável autoriza o uso de imagem na ficha.</p></div>
@@ -232,6 +236,16 @@ input[type=time]{display:block;min-width:0;max-width:100%;-webkit-appearance:non
 <section id="prof" class="screen">
   <div class="banner"><button class="sair" data-act="sair">Sair</button><span class="quem">Área do professor</span></div>
   <div class="wrap" id="profc"></div>
+</section>
+
+<section id="avaledit" class="screen">
+  <div class="bar"><button class="back" data-act="avalvolta" aria-label="Voltar">‹ Voltar</button><h2>Avaliação</h2></div>
+  <div class="wrap" id="avalc"></div>
+</section>
+
+<section id="avalver" class="screen">
+  <div class="bar"><button class="back" data-go="pais" aria-label="Voltar">‹ Voltar</button><h2>Evolução</h2></div>
+  <div class="wrap" id="avalvc"></div>
 </section>
 
 <section id="owner" class="screen">
@@ -277,7 +291,12 @@ const PUB={todos:'Todos os responsáveis',maiores:'Categoria dos 9 aos 13 anos',
 function idade(nasc){const n=new Date(),b=new Date(nasc+'T12:00:00');let a=n.getFullYear()-b.getFullYear();const m=n.getMonth()-b.getMonth();if(m<0||(m===0&&n.getDate()<b.getDate()))a--;return a}
 const catDe=a=>a>=9&&a<=13?'maiores':a>=5&&a<=8?'menores':null;
 const avatar=(s,g)=>`<span class="av${g?' g':''}"${s.foto?` style="background-image:url(${esc(s.foto)})"`:''}>${s.foto?'':esc((s.nome||'?').trim().charAt(0).toUpperCase())}</span>`;
-let fotoNova='',fotoAlvo=null,compAlvo=null;
+let fotoNova='',fotoAlvo=null,compAlvo=null,avalAlvo=null,avalVals={},avalVolta='home',profModo='chamada';
+const FUND=[['passe','Passe'],['conducao','Condução de bola'],['finalizacao','Finalização'],['marcacao','Marcação'],['equipe','Trabalho em equipe'],['disciplina','Disciplina']];
+const ROT=['','Começando','Em evolução','Bom','Muito bom','Destaque'];
+const semAtual=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()<6?1:2)};
+const semNome=p=>(String(p).endsWith('-1')?'1º':'2º')+' semestre de '+String(p).slice(0,4);
+function freqRow(id){const f=D.freq&&D.freq[id];if(!f)return '';return `<div class="row"><span>Presença no mês</span><b>${f.treinos_mes?f.pres_mes+' de '+f.treinos_mes+' treinos':'Sem chamada ainda'}</b></div>${f.treinos_ano?`<div class="row"><span>Presença no ano</span><b>${f.pres_ano} de ${f.treinos_ano} treinos</b></div>`:''}`}
 const soDig=s=>String(s||'').replace(/\D/g,'');
 const wpp=(tel,txt)=>{let n=soDig(tel);if(n.length===10||n.length===11)n='55'+n;return 'https://wa.me/'+(n.length>=12?n:'')+'?text='+encodeURIComponent(txt)};
 const ascii=(t,max)=>String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Za-z0-9 ]/g,'').trim().toUpperCase().slice(0,max);
@@ -293,7 +312,7 @@ function fotoDe(file){return new Promise((ok,no)=>{const r=new FileReader();r.on
 const slots=c=>c.h.map(([d,h])=>`<div class="row"><b>${d}</b><span>${h}</span></div>`).join('');
 
 let sb,user=null,perfil=null,tab='chamada',ltipo='in',cd=today(),routedFor=null,busy=false,recovering=false,adminTry=false,profTry=false;
-let D={alunos:[],pag:[],lanc:[],avisos:[],pres:{},fee:80,eventos:[],resp:[],comps:[],alertas:{},contas:[]};
+let D={alunos:[],pag:[],lanc:[],avisos:[],pres:{},fee:80,eventos:[],resp:[],comps:[],alertas:{},contas:[],freq:{},avals:[]};
 
 async function copiarTexto(t,msg='Mensagem copiada.'){
   try{await navigator.clipboard.writeText(t);toast(msg)}
@@ -439,6 +458,13 @@ async function loadPais(){
     sb.from('comprovantes').select('aluno_id,mes,status,enviado_em').eq('mes',mes1()).order('enviado_em',{ascending:false})
   ]);
   D.eventos=ev.data||[];D.resp=rs.data||[];D.comps=cp.data||[];
+  D.freq={};D.avals=[];
+  if(D.alunos.length){
+    const fr=await Promise.all(D.alunos.map(s=>sb.rpc('frequencia',{p_aluno:s.id})));
+    D.alunos.forEach((s,i)=>{const r=fr[i].data;if(r&&r[0])D.freq[s.id]=r[0]});
+    const av=await sb.from('avaliacoes').select('*').in('aluno_id',D.alunos.map(s=>s.id)).order('periodo',{ascending:false});
+    D.avals=av.data||[];
+  }
 }
 function renderPais(extra=''){
   const hj=new Date(),dia=hj.getDate(),mm=pad(hj.getMonth()+1),prox=pad(((hj.getMonth()+1)%12)+1);
@@ -449,7 +475,7 @@ function renderPais(extra=''){
     else{st='<b>Pendente</b>';info=VENC?'Vence em '+pad(VENC)+'/'+mm:''}
     const cp=D.comps.find(x=>x.aluno_id===s.id);
     if(!pago&&cp){if(cp.status==='pendente'){st='<b>Em conferência</b>';info='Comprovante enviado'}else if(cp.status==='recusado'){info='Comprovante recusado. Envie de novo.'}}
-    return `<div class="card ok"><div class="head">${avatar(s,1)}<div><h3>${esc(s.nome)}</h3><p class="hint" style="margin:4px 0 0">${c.nome}</p><button class="fbtn" data-act="fotobtn" data-id="${s.id}">${s.foto?'Trocar foto':'Adicionar foto'}</button></div></div><div style="height:8px"></div>${slots(c)}<div class="row"><div><b>Mensalidade de ${fmt(D.fee)}</b>${VENC?`<small>Vence todo dia ${VENC}</small>`:''}</div><div style="text-align:right">${st}<small>${info}</small></div></div>${pago?'':`<button class="btn" data-act="comp" data-id="${s.id}">${cp&&cp.status==='pendente'?'Enviar outro comprovante':'Enviar comprovante'}</button>`}</div>`}).join('')||'<div class="card"><p class="hint" style="margin:0">Nenhum aluno inscrito ainda. Preencha abaixo para inscrever seu filho.</p></div>';
+    return `<div class="card ok"><div class="head">${avatar(s,1)}<div><h3>${esc(s.nome)}</h3><p class="hint" style="margin:4px 0 0">${c.nome}</p><button class="fbtn" data-act="fotobtn" data-id="${s.id}">${s.foto?'Trocar foto':'Adicionar foto'}</button></div></div><div style="height:8px"></div>${slots(c)}${freqRow(s.id)}${D.avals.some(x=>x.aluno_id===s.id)?`<button class="btn" data-act="veraval" data-id="${s.id}">Ver avaliação do atleta</button>`:''}<div class="row"><div><b>Mensalidade de ${fmt(D.fee)}</b>${VENC?`<small>Vence todo dia ${VENC}</small>`:''}</div><div style="text-align:right">${st}<small>${info}</small></div></div>${pago?'':`<button class="btn" data-act="comp" data-id="${s.id}">${cp&&cp.status==='pendente'?'Enviar outro comprovante':'Enviar comprovante'}</button>`}</div>`}).join('')||'<div class="card"><p class="hint" style="margin:0">Nenhum aluno inscrito ainda. Preencha abaixo para inscrever seu filho.</p></div>';
   const px=D.pix||{};
   const devendo=D.alunos.filter(s=>!D.pag.some(x=>x.aluno_id===s.id)).length,valor=D.fee*devendo;
   const pixCard=(px.pix_chave&&D.alunos.length)?`<div class="card"><h3>Como pagar (PIX)</h3>${devendo?`<p class="hint" style="margin:0 0 10px">Copie o código e cole no app do seu banco, em <b>PIX Copia e Cola</b>. O valor de <b>${fmt(valor)}</b>${devendo>1?` (${devendo} alunos)`:''} já vem preenchido. Depois, toque em <b>Enviar comprovante</b> no card do atleta.</p><button class="btn p" data-act="copiapix" style="margin:0 0 6px">Copiar PIX copia e cola</button>`:'<p class="hint" style="margin:0 0 8px">A mensalidade deste mês já está paga. Obrigado!</p>'}<div class="row"><span>Recebedor</span><b>${esc(px.pix_nome)}</b></div>${px.pix_banco?`<div class="row"><span>Banco</span><b>${esc(px.pix_banco)}</b></div>`:''}<div class="row" style="flex-direction:column;align-items:stretch"><small>Ou use a chave PIX (aleatória)</small><b style="word-break:break-all;font-size:15px;margin:4px 0 10px">${esc(px.pix_chave)}</b><button class="btn" data-act="copiar" style="margin:0">Copiar só a chave</button></div></div>`:'';
@@ -576,12 +602,12 @@ async function verFicha(id){
   const{data:f,error}=await sb.from('fichas').select('*').eq('aluno_id',id).maybeSingle();
   const c=CATS[s.categoria],kv=(k,v)=>`<div class="row kv"><span>${k}</span><b>${esc(v||'—')}</b></div>`;
   const cab=`<h2 style="font-size:26px;margin:18px 0 4px">Ficha de inscrição</h2><p class="hint" style="margin:0">Escolinha de Futebol do Peñarol, Sapiranga/RS</p>`;
-  const bt=`<button class="btn p noprint" data-act="imprimir" style="margin-top:16px">Imprimir ficha</button>`;
+  const bt=`<button class="btn p noprint" data-act="imprimir" style="margin-top:16px">Imprimir ficha</button>`,avb=`<button class="btn noprint" data-act="avaliar" data-id="${id}">Avaliação do semestre</button>`;
   if(error){$('#fichav').innerHTML=cab+'<p class="err">Não foi possível carregar a ficha.</p>';return}
   const atl=`<div class="card"><div class="head" style="margin-bottom:6px">${avatar(s,1)}<h3>Dados do atleta</h3></div>${kv('Nome',s.nome)}${kv('Nascimento',br(s.nasc)+' ('+idade(s.nasc)+' anos)')}${kv('Categoria',c.nome)}`;
-  if(!f){$('#fichav').innerHTML=cab+atl+'<p class="hint" style="margin-top:10px">Este aluno ainda não tem ficha de inscrição preenchida.</p></div>';return}
+  if(!f){$('#fichav').innerHTML=cab+atl+'<p class="hint" style="margin-top:10px">Este aluno ainda não tem ficha de inscrição preenchida.</p></div>'+avb;return}
   const sn=t=>t?'Sim: '+t:'Não';
-  $('#fichav').innerHTML=cab+bt+atl+kv('CPF/RG',f.cpf_rg_atleta)+kv('Endereço',f.endereco)+kv('Bairro',f.bairro)+kv('Cidade',f.cidade)+kv('Escola',f.escola)+kv('Camiseta',f.camiseta)+`</div>
+  $('#fichav').innerHTML=cab+bt+avb+atl+kv('CPF/RG',f.cpf_rg_atleta)+kv('Endereço',f.endereco)+kv('Bairro',f.bairro)+kv('Cidade',f.cidade)+kv('Escola',f.escola)+kv('Camiseta',f.camiseta)+`</div>
   <div class="card"><h3>Dados do responsável</h3>${kv('Nome',f.resp_nome)}${kv('Parentesco',f.resp_parentesco)}${kv('CPF',f.resp_cpf)}${kv('Telefone/WhatsApp',f.resp_tel)}${kv('Emergência',f.resp_tel_emergencia)}</div>
   <div class="card"><h3>Informações importantes</h3>${kv('Alergia',sn(f.alergia))}${kv('Medicamento',sn(f.medicamento))}${kv('Restrição física',sn(f.restricao))}</div>
   <div class="card"><h3>Autorização</h3>${kv('Participação nas atividades','Autorizada')}${kv('Uso de imagem',f.autoriza_imagem?'Autorizado':'Não autorizado')}${kv('Assinatura digital',f.aceite_nome)}${kv('Data do aceite',new Date(f.aceite_em).toLocaleString('pt-BR'))}</div>`;
@@ -596,10 +622,36 @@ async function loadProf(){
   ]);
   D.alunos=a.data||[];D.pres={};(pr.data||[]).forEach(x=>D.pres[x.aluno_id]=1);
   D.alertas={};(al.data||[]).forEach(x=>D.alertas[x.aluno_id]=x);
+  const avs=await sb.from('avaliacoes').select('aluno_id,periodo').eq('periodo',semAtual());D.avals=avs.data||[];
   if(a.error||pr.error)toast('Alguns dados não carregaram. Atualize a página.');
 }
 function renderProf(){
-  $('#profc').innerHTML=`<h2 style="font-size:28px;margin-top:6px">Olá, ${esc((perfil.nome||'').split(' ')[0])}</h2><p class="hint">Marque a presença dos alunos. As etiquetas vermelhas mostram alergias e cuidados informados pelos pais.</p>${D.alunos.some(x=>x.responsavel_id===user.id)?'<button class="btn" data-act="verpais">Área do responsável (meus filhos)</button>':''}`+vChamada();
+  $('#profc').innerHTML=`<h2 style="font-size:28px;margin-top:6px">Olá, ${esc((perfil.nome||'').split(' ')[0])}</h2>${D.alunos.some(x=>x.responsavel_id===user.id)?'<button class="btn" data-act="verpais">Área do responsável (meus filhos)</button>':''}<div class="seg" style="margin-top:14px"><button class="${profModo==='chamada'?'on':''}" data-act="profmodo" data-id="chamada">Chamada</button><button class="${profModo==='aval'?'on':''}" data-act="profmodo" data-id="aval">Avaliações</button></div>`+(profModo==='aval'?vAvalLista():'<p class="hint">Marque a presença dos alunos. As etiquetas vermelhas mostram alergias e cuidados informados pelos pais.</p>'+vChamada());
+}
+function vAvalLista(){
+  const sem=semAtual(),feito=id=>D.avals.some(a=>a.aluno_id===id&&a.periodo===sem);
+  return '<p class="hint">'+semNome(sem)+'. Toque no aluno para avaliar ou mudar a avaliação.</p>'+Object.entries(CATS).map(([k,c])=>{
+    const l=D.alunos.filter(s=>s.categoria===k);
+    return `<div class="card"><h3>${c.nome}</h3><p class="hint" style="margin:0 0 4px">${l.filter(s=>feito(s.id)).length} de ${l.length} avaliados.</p>${l.map(s=>`<div class="row"><div class="who">${avatar(s)}<b>${esc(s.nome)}</b></div><button class="pg ${feito(s.id)?'on':''}" data-act="avaliar" data-id="${s.id}">${feito(s.id)?'Avaliado':'Avaliar'}</button></div>`).join('')||'<p class="hint">Nenhum aluno nesta categoria.</p>'}</div>`}).join('');
+}
+async function abrirAval(id,volta){
+  const{data,error}=await sb.from('avaliacoes').select('*').eq('aluno_id',id).eq('periodo',semAtual()).maybeSingle();
+  if(error){toast('Não foi possível abrir a avaliação.');return}
+  avalAlvo=id;avalVolta=volta;avalVals=data?Object.assign({},data):{recado:''};
+  go('avaledit');renderAvalEdit();
+}
+function renderAvalEdit(){
+  const s=D.alunos.find(x=>x.id===avalAlvo)||{nome:''};
+  $('#avalc').innerHTML=`<h2 style="font-size:26px;margin-top:16px">${esc(s.nome)}</h2><p class="hint">${semNome(semAtual())}. Dê uma nota de 1 a 5 em cada fundamento. Os pais veem o resultado no app.</p>`+
+    FUND.map(([k,n])=>`<label>${n}${avalVals[k]?' · <span style="color:var(--ye)">'+ROT[avalVals[k]]+'</span>':''}</label><div class="nota">${[1,2,3,4,5].map(i=>`<button class="${avalVals[k]===i?'on':''}" data-act="nota" data-k="${k}" data-v="${i}" aria-label="${n}: nota ${i}">${i}</button>`).join('')}</div>`).join('')+
+    `<p class="hint">1 Começando · 2 Em evolução · 3 Bom · 4 Muito bom · 5 Destaque</p><label for="avrec">Recado para os pais (opcional)</label><textarea id="avrec" rows="4" maxlength="600">${esc(avalVals.recado||'')}</textarea><div id="averr" class="err" role="alert"></div><button class="btn p" data-act="salvaraval" style="margin-top:16px">Salvar avaliação</button>`;
+}
+async function voltaAval(){if(avalVolta==='prof'){await loadProf();go('prof');renderProf()}else go(avalVolta)}
+function renderAvalVer(id){
+  const s=D.alunos.find(x=>x.id===id),l=D.avals.filter(x=>x.aluno_id===id);if(!s||!l.length)return;
+  const a=l[0],ant=l[1];
+  const barras=FUND.map(([k,n])=>`<div style="margin-top:14px"><div class="row" style="border:0;padding:0"><span>${n}</span><b>${ROT[a[k]]||''}</b></div><div class="seg5">${[1,2,3,4,5].map(i=>`<i class="${i<=a[k]?'on':''}"></i>`).join('')}</div>${ant&&ant[k]!==a[k]?`<small class="hint">${a[k]>ant[k]?'Melhorou':'Caiu'} em relação ao ${semNome(ant.periodo)}</small>`:''}</div>`).join('');
+  $('#avalvc').innerHTML=`<div class="head" style="margin-top:16px">${avatar(s,1)}<div><h3>${esc(s.nome)}</h3><p class="hint" style="margin:0">Avaliação do ${semNome(a.periodo)}</p></div></div><div class="card">${barras}</div>${a.recado?`<div class="card ok"><h3>Recado do professor</h3><p style="margin:0;white-space:pre-line">${esc(a.recado)}</p></div>`:''}`;
 }
 const rerChamada=()=>perfil&&perfil.role==='professor'?renderProf():renderOwner('chamada');
 
@@ -816,6 +868,18 @@ async function acao(d,btn){
   }
   else if(d.act==='verpais'){await loadPais();go('pais');renderPais()}
   else if(d.act==='verprof'){await loadProf();go('prof');renderProf()}
+  else if(d.act==='profmodo'){profModo=d.id;renderProf()}
+  else if(d.act==='avaliar'){await abrirAval(d.id,perfil&&perfil.role==='professor'?'prof':'ficha')}
+  else if(d.act==='avalvolta'){await voltaAval()}
+  else if(d.act==='veraval'){go('avalver');renderAvalVer(d.id)}
+  else if(d.act==='nota'){const t=$('#avrec');if(t)avalVals.recado=t.value;avalVals[d.k]=Number(d.v);const y=window.scrollY;renderAvalEdit();window.scrollTo(0,y)}
+  else if(d.act==='salvaraval'){
+    const rec=$('#avrec').value.trim(),err=$('#averr');
+    if(FUND.some(([k])=>!avalVals[k])){err.textContent='Dê uma nota em todos os fundamentos.';return}
+    err.textContent='';
+    const row={aluno_id:avalAlvo,periodo:semAtual(),recado:rec,atualizado_em:new Date().toISOString()};FUND.forEach(([k])=>row[k]=avalVals[k]);
+    await guard(btn,async()=>{const{error}=await sb.from('avaliacoes').upsert(row,{onConflict:'aluno_id,periodo'});if(fail(error))return;toast('Avaliação salva.');await voltaAval()});
+  }
   else if(d.act==='tipo'){ltipo=d.id;renderOwner('lanc')}
   else if(d.act==='addtx'){
     const descricao=$('#ld').value.trim(),valor=parseFloat($('#lv').value),data=$('#la').value;
