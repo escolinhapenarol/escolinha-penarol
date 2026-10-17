@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7uUjSobQQomJIBtDWeCa+C6oBEqKRtPDbD9SkJqiAJA=' 'sha256-FPxu2aIxM6aSoJWlU1GzKrK2B+MGf7bDG1WFV0LyLZg=' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src https://ihiaoaorhyefhysqgadr.supabase.co wss://ihiaoaorhyefhysqgadr.supabase.co; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7uUjSobQQomJIBtDWeCa+C6oBEqKRtPDbD9SkJqiAJA=' 'sha256-DCuf6IZCYoannb4q0Pu3SD0L2yVTYTBCE0DJbN/NeQ8=' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src https://ihiaoaorhyefhysqgadr.supabase.co wss://ihiaoaorhyefhysqgadr.supabase.co; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Escolinha Peñarol</title>
@@ -379,8 +379,9 @@ function chartBars(ms,label){
     return `<rect class="bi" x="${x}" y="${120-hi}" width="${bw}" height="${hi}" rx="3"/><rect class="bo" x="${x+bw+2}" y="${120-ho}" width="${bw}" height="${ho}" rx="3"/><text x="${x+bw+1}" y="136" text-anchor="middle">${m.l}</text>`}).join('');
   return `<svg viewBox="0 0 320 142" width="100%" role="img" aria-label="${label}">${b}</svg>`;
 }
+function grupoLanc(x){if(x.pagamento_id||x.categoria==='Mensalidades')return 'Mensalidades';if(x.categoria==='Patrocínio')return 'Patrocínios';const d=String(x.descricao||'').trim();return d?d.charAt(0).toUpperCase()+d.slice(1):x.categoria}
 function porCat(l,tipo,vazio){
-  const por={};l.filter(x=>x.tipo===tipo).forEach(x=>por[x.categoria]=(por[x.categoria]||0)+Number(x.valor));
+  const por={};l.filter(x=>x.tipo===tipo).forEach(x=>{const c=grupoLanc(x);por[c]=(por[c]||0)+Number(x.valor)});
   const to=Object.values(por).reduce((a,b)=>a+b,0)||1;
   return Object.entries(por).sort((a,b)=>b[1]-a[1]).map(([c,v])=>`<div style="margin-top:12px"><div class="row" style="border:0;padding:0"><span>${esc(c)}</span><b>${fmt(v)}</b></div><div class="hb"><i style="width:${v/to*100}%${tipo==='out'?';background:var(--rd)':''}"></i></div></div>`).join('')||`<p class="hint">${vazio}</p>`;
 }
@@ -422,7 +423,7 @@ function imgJpeg(file,max){return new Promise((ok,no)=>{const r=new FileReader()
 function fotoDe(file){return new Promise((ok,no)=>{const r=new FileReader();r.onerror=no;r.onload=()=>{const im=new Image();im.onerror=no;im.onload=()=>{const z=256,cv=document.createElement('canvas');cv.width=cv.height=z;const m=Math.min(im.width,im.height);cv.getContext('2d').drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,z,z);ok(cv.toDataURL('image/jpeg',.8))};im.src=r.result};r.readAsDataURL(file)})}
 const slots=c=>c.h.map(([d,h])=>`<div class="row"><b>${d}</b><span>${h}</span></div>`).join('');
 
-let sb,user=null,perfil=null,tab='chamada',ltipo='in',cd=today(),routedFor=null,busy=false,recovering=false,adminTry=false,profTry=false;
+let sb,user=null,perfil=null,tab='chamada',ltipo='in',patroAbre=null,patroEdit=null,patroNovo=false,cd=today(),routedFor=null,busy=false,recovering=false,adminTry=false,profTry=false;
 let D={alunos:[],pag:[],lanc:[],avisos:[],pres:{},fee:80,eventos:[],resp:[],comps:[],alertas:{},contas:[],freq:{},avals:[]};
 
 async function copiarTexto(t,msg='Mensagem copiada.'){
@@ -792,15 +793,17 @@ async function loadOwner(){
   D.alunos=a.data||[];D.pag=p.data||[];D.lanc=l.data||[];D.avisos=v.data||[];
   D.fee=cf.data?Number(cf.data.mensalidade):80;D.pix=cf.data||{};VENC=cf.data&&cf.data.vencimento?Number(cf.data.vencimento):null;
   D.pres={};(pr.data||[]).forEach(x=>D.pres[x.aluno_id]=1);
-  const [ev,rs,cp,al,ct,pa]=await Promise.all([
+  const [ev,rs,cp,al,ct,pa,pt,pp]=await Promise.all([
     sb.from('eventos').select('*').gte('quando',new Date(Date.now()-6*3600e3).toISOString()).order('quando'),
     sb.from('respostas').select('*'),
     sb.from('comprovantes').select('*, alunos(nome)').eq('status','pendente').order('enviado_em'),
     sb.rpc('alertas_saude'),
     sb.from('profiles').select('id,nome,tel,role').order('nome'),
-    sb.from('pagamentos').select('id,aluno_id,mes,valor,forma').order('mes')
+    sb.from('pagamentos').select('id,aluno_id,mes,valor,forma').order('mes'),
+    sb.from('patrocinadores').select('*').order('nome'),
+    sb.from('patrocinio_pagamentos').select('*').order('data',{ascending:false})
   ]);
-  D.eventos=ev.data||[];D.resp=rs.data||[];D.comps=cp.data||[];D.contas=ct.data||[];D.pagAll=pa.data||[];
+  D.eventos=ev.data||[];D.resp=rs.data||[];D.comps=cp.data||[];D.contas=ct.data||[];D.pagAll=pa.data||[];D.patros=pt.data||[];D.patroPag=pp.data||[];
   D.alertas={};(al.data||[]).forEach(x=>D.alertas[x.aluno_id]=x);
   const e=[a,p,l,v,cf,pr].find(r=>r.error&&r.status!==406);if(e)toast('Alguns dados não carregaram. Atualize a página.');
 }
@@ -865,7 +868,7 @@ async function baixar(nome,txt,tipo){
   try{const f=new File([blob],nome,{type:tipo});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:nome});return}}catch(e){if(e&&e.name==='AbortError')return}
   const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=nome;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000);
 }
-const TAB_COPIA=['alunos','fichas','profiles','pagamentos','lancamentos','comprovantes','avisos','eventos','respostas','presencas','avaliacoes','config'];
+const TAB_COPIA=['alunos','fichas','profiles','pagamentos','lancamentos','comprovantes','avisos','eventos','respostas','presencas','avaliacoes','config','patrocinadores','patrocinio_pagamentos'];
 async function copiaSeguranca(){
   const out={app:'Escolinha Peñarol',gerado_em:new Date().toISOString(),tabelas:{}};
   for(const t of TAB_COPIA){const l=[];for(let i=0;i<500000;i+=1000){const{data,error}=await sb.from(t).select('*').range(i,i+999);if(error)throw error;l.push(...(data||[]));if(!data||data.length<1000)break}out.tabelas[t]=l}
@@ -936,21 +939,58 @@ let lancEdit=null;
 const ICLIP='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>';
 const IEDIT='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg>';
 function vLanc(){
-  const e=lancEdit&&D.lanc.find(x=>x.id===lancEdit),tipo=e?e.tipo:ltipo,cats=tipo==='in'?CIN:COUT,cat=e?e.categoria:'';
-  const catOpts=(cat&&!cats.includes(cat)?cats.concat([cat]):cats).map(c=>`<option${c===cat?' selected':''}>${esc(c)}</option>`).join('');
-  const rows=D.lanc.slice(0,80).map(x=>{const auto=!!x.pagamento_id;
-    return `<div class="row"><div><b>${esc(x.descricao)}</b><small>${esc(x.categoria)} em ${br(x.data)}${auto?' · automático':''}${x.nota?' · com nota':''}</small></div><div style="display:flex;align-items:center"><b class="${x.tipo}" style="white-space:nowrap">${x.tipo==='in'?'+':'-'}${fmt(x.valor)}</b>${x.nota?`<button class="x" data-act="vernota" data-id="${x.id}" aria-label="Ver nota de ${esc(x.descricao)}">${ICLIP}</button>`:''}${auto?'':`<button class="x" data-act="edittx" data-id="${x.id}" aria-label="Editar ${esc(x.descricao)}">${IEDIT}</button>`}<button class="x" data-act="deltx" data-id="${x.id}" aria-label="Apagar lançamento">×</button></div></div>`}).join('')||'<p class="hint">Nenhum lançamento ainda. Registre a primeira entrada ou saída acima.</p>';
-  return `<div class="card${e?' ok':''}"><h3>${e?'Editar lançamento':'Novo lançamento'}</h3>
-  ${e?`<p class="hint" style="margin:0">${e.tipo==='in'?'Entrada':'Saída'} de ${br(e.data)}</p>`:`<div class="seg"><button class="${ltipo==='in'?'on':''}" data-act="tipo" data-id="in">Entrada</button><button class="${ltipo==='out'?'on':''}" data-act="tipo" data-id="out">Saída</button></div>`}
-  <label for="lc">Categoria</label><select id="lc">${catOpts}</select>
-  <label for="ld">Descrição</label><input id="ld" autocomplete="off" value="${e?esc(e.descricao):''}">
+  const e=lancEdit&&D.lanc.find(x=>x.id===lancEdit),tipo=e?e.tipo:ltipo;
+  const seg=e?'':`<div class="seg" style="margin:0 0 12px"><button class="${tipo==='patro'?'on':''}" data-act="tipo" data-id="patro">Patrocínio</button><button class="${tipo==='in'?'on':''}" data-act="tipo" data-id="in">Entradas</button><button class="${tipo==='out'?'on':''}" data-act="tipo" data-id="out">Saídas</button></div>`;
+  if(tipo==='patro')return seg+vPatro();
+  const auto=x=>!!x.pagamento_id||patroLanc(x.id);
+  const ym=ymOf(new Date()),doMes=D.lanc.filter(x=>x.tipo===tipo&&String(x.data).startsWith(ym)).reduce((a,x)=>a+Number(x.valor),0);
+  const rows=D.lanc.filter(x=>x.tipo===tipo).slice(0,80).map(x=>{const a=auto(x);
+    return `<div class="row"><div><b>${esc(x.descricao)}</b><small>${br(x.data)}${a?' · automático':''}${x.nota?' · com nota':''}</small></div><div style="display:flex;align-items:center"><b class="${x.tipo}" style="white-space:nowrap">${x.tipo==='in'?'+':'-'}${fmt(x.valor)}</b>${x.nota?`<button class="x" data-act="vernota" data-id="${x.id}" aria-label="Ver nota de ${esc(x.descricao)}">${ICLIP}</button>`:''}${a?'':`<button class="x" data-act="edittx" data-id="${x.id}" aria-label="Editar ${esc(x.descricao)}">${IEDIT}</button>`}<button class="x" data-act="deltx" data-id="${x.id}" aria-label="Apagar lançamento">×</button></div></div>`}).join('')||`<p class="hint">Nenhuma ${tipo==='in'?'entrada':'saída'} ainda.</p>`;
+  const nome=tipo==='in'?'entrada':'saída';
+  return seg+`<div class="card${e?' ok':''}"><h3>${e?'Editar '+nome:'Nova '+nome}</h3>
+  ${e?`<p class="hint" style="margin:0">${e.tipo==='in'?'Entrada':'Saída'} de ${br(e.data)}</p>`:''}
+  <label for="ld">Descrição</label><input id="ld" autocomplete="off" placeholder="${tipo==='in'?'Ex.: rifa do campeonato':'Ex.: aluguel do ginásio'}" value="${e?esc(e.descricao):''}">
   <label for="lv">Valor (R$)</label><input id="lv" type="number" inputmode="decimal" min="0" step="0.01" value="${e?esc(e.valor):''}">
   <label for="la">Data</label><input id="la" type="date" value="${e?esc(String(e.data).slice(0,10)):today()}">
   <label for="lnota">Foto da nota ou recibo (opcional)</label><input id="lnota" type="file" accept="image/*,application/pdf">
   ${e&&e.nota?`<p class="hint">Este lançamento já tem nota (<button class="lnk" data-act="vernota" data-id="${e.id}" style="display:inline;margin:0;font-size:14px">ver</button>). Escolher outra substitui.</p><label class="chk" for="lnrm"><input id="lnrm" type="checkbox"><span>Tirar a nota</span></label>`:''}
   <div id="lerr2" class="err" role="alert"></div>
-  <button class="btn p" data-act="addtx" style="margin-top:16px">${e?'Salvar alterações':'Salvar lançamento'}</button>${e?'<button class="btn" data-act="canceledit">Cancelar</button>':''}</div>
-  <div class="card"><h3>Histórico</h3>${rows}</div>`;
+  <button class="btn p" data-act="addtx" style="margin-top:16px">${e?'Salvar alterações':'Salvar '+nome}</button>${e?'<button class="btn" data-act="canceledit">Cancelar</button>':''}</div>
+  <div class="card"><h3>${tipo==='in'?'Entradas':'Saídas'}</h3><div class="row" style="padding-top:0"><span>Neste mês</span><b class="${tipo}">${tipo==='in'?'+':'-'}${fmt(doMes)}</b></div>${rows}${tipo==='in'?'<p class="hint">Mensalidades e patrocínios entram aqui sozinhos (automático).</p>':''}</div>`;
+}
+const patroLanc=id=>(D.patroPag||[]).some(p=>p.lancamento_id===id);
+const patroRec=id=>(D.patroPag||[]).filter(p=>p.patrocinador_id===id).reduce((a,p)=>a+Number(p.valor),0);
+const FORMAN={pix:'PIX',dinheiro:'dinheiro',outro:'outro'};
+function vPatro(){
+  const ps=D.patros||[],at=ps.filter(p=>p.ativo);
+  const comb=at.reduce((a,p)=>a+Number(p.combinado),0),rec=at.reduce((a,p)=>a+patroRec(p.id),0);
+  const ed=patroEdit&&ps.find(p=>p.id===patroEdit);
+  const form=(patroNovo||ed)?`<div class="card ok"><h3>${ed?'Editar patrocinador':'Novo patrocinador'}</h3>
+    <label for="pn">Nome</label><input id="pn" maxlength="120" autocomplete="off" value="${ed?esc(ed.nome):''}">
+    <label for="pc">WhatsApp (opcional)</label><input id="pc" type="tel" inputmode="tel" maxlength="40" autocomplete="off" value="${ed?esc(ed.contato):''}">
+    <label for="pv">Valor combinado (R$)</label><input id="pv" type="number" inputmode="decimal" min="0" step="0.01" value="${ed?esc(ed.combinado):''}">
+    <label for="pdsc">O que foi combinado (opcional)</label><input id="pdsc" maxlength="300" autocomplete="off" placeholder="Ex.: logo na camiseta, 12x de R$ 100" value="${ed?esc(ed.descricao):''}">
+    ${ed?`<label class="chk" for="pat"><input id="pat" type="checkbox"${ed.ativo?'':' checked'}><span>Patrocínio encerrado</span></label>`:''}
+    <div id="perr" class="err" role="alert"></div>
+    <button class="btn p" data-act="patrosalva" style="margin-top:16px">${ed?'Salvar alterações':'Salvar patrocinador'}</button><button class="btn" data-act="patrocancela">Cancelar</button>
+    ${ed?`<button class="lnk" data-act="patrodel" data-id="${ed.id}">Apagar patrocinador</button>`:''}</div>`:'';
+  const card=p=>{const r=patroRec(p.id),c=Number(p.combinado),f=Math.max(0,c-r),pct=c>0?Math.min(100,r/c*100):0,ab=patroAbre===p.id;
+    const hist=(D.patroPag||[]).filter(x=>x.patrocinador_id===p.id).map(x=>`<div class="row"><span>${br(x.data)} · ${FORMAN[x.forma]||x.forma}</span><div style="display:flex;align-items:center"><b class="in">+${fmt(x.valor)}</b><button class="x" data-act="patropagdel" data-id="${x.id}" aria-label="Apagar pagamento de ${br(x.data)}">×</button></div></div>`).join('');
+    return `<div class="card"${p.ativo?'':' style="opacity:.6"'}><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div><h3 style="margin:0">${esc(p.nome)}</h3>${p.descricao?`<small class="hint" style="display:block;margin:2px 0 0">${esc(p.descricao)}</small>`:''}</div><div style="display:flex;align-items:center;gap:6px">${!p.ativo?'<span class="tag" style="margin:0;color:var(--mut);background:var(--bk3)">Encerrado</span>':c>0&&f<=0?'<span class="tag" style="margin:0;color:#0a0a0a;background:var(--gr,#4cc38a)">Quitado</span>':''}<button class="x" data-act="patroedit" data-id="${p.id}" aria-label="Editar ${esc(p.nome)}">${IEDIT}</button></div></div>
+      <div class="hb" style="margin-top:12px"><i style="width:${pct}%"></i></div>
+      <div class="row" style="border:0;padding:8px 0 0"><span>Recebido <b>${fmt(r)}</b> de ${fmt(c)}</span><span>Falta <b style="color:var(--ye)">${fmt(f)}</b></span></div>
+      ${p.ativo?`<div style="display:flex;gap:8px;margin-top:10px"><button class="btn p" data-act="patroabre" data-id="${p.id}" style="margin:0;flex:1">${ab?'Fechar':'Registrar pagamento'}</button>${f>0?`<button class="btn" data-act="patrolembra" data-id="${p.id}" style="margin:0;width:auto;padding:0 16px">Lembrar</button>`:''}</div>`:''}
+      ${ab?`<label for="ppv">Valor (R$)</label><input id="ppv" type="number" inputmode="decimal" min="0" step="0.01" value="${f>0?f.toFixed(2):''}">
+      <label for="ppd">Data</label><input id="ppd" type="date" value="${today()}">
+      <label for="ppf">Forma</label><select id="ppf"><option value="pix">PIX</option><option value="dinheiro">Dinheiro</option><option value="outro">Outro</option></select>
+      <div id="pperr" class="err" role="alert"></div>
+      <button class="btn p" data-act="patropaga" data-id="${p.id}" style="margin-top:12px">Confirmar · entra no caixa</button>`:''}
+      ${hist?`<details style="margin-top:10px"><summary class="hint" style="cursor:pointer">Pagamentos recebidos</summary>${hist}</details>`:''}</div>`};
+  const kb='font-size:15px;white-space:nowrap';
+  return `<div class="grid3" style="margin-top:0;grid-template-columns:repeat(3,minmax(0,1fr))"><div class="k"><small>Combinado</small><b style="${kb}">${fmt(comb)}</b></div><div class="k"><small>Recebido</small><b class="in" style="${kb}">${fmt(rec)}</b></div><div class="k"><small>Falta</small><b style="${kb};color:var(--ye)">${fmt(Math.max(0,comb-rec))}</b></div></div>`+
+    form+at.map(card).join('')+(at.length||form?'':'<div class="card"><p class="hint" style="margin:0">Nenhum patrocinador ainda. Cadastre o primeiro e registre os pagamentos aqui. Cada pagamento entra sozinho em Entradas.</p></div>')+
+    (form?'':'<button class="btn" data-act="patronovo" style="border-style:dashed;color:var(--ye);border-color:var(--ye)">+ Novo patrocinador</button>')+
+    ps.filter(p=>!p.ativo).map(card).join('')+'<p class="hint">Cada pagamento registrado aqui entra sozinho em Entradas.</p>';
 }
 async function subirNota(file){
   let blob,ext,type;
@@ -1157,18 +1197,55 @@ async function acao(d,btn){
     const row={aluno_id:avalAlvo,periodo:semAtual(),recado:rec,atualizado_em:new Date().toISOString()};FUND.forEach(([k])=>row[k]=avalVals[k]);
     await guard(btn,async()=>{const{error}=await sb.from('avaliacoes').upsert(row,{onConflict:'aluno_id,periodo'});if(fail(error))return;toast('Avaliação salva.');await voltaAval()});
   }
-  else if(d.act==='tipo'){ltipo=d.id;renderOwner('lanc')}
+  else if(d.act==='tipo'){ltipo=d.id;lancEdit=null;renderOwner('lanc')}
+  else if(d.act==='patronovo'){patroNovo=true;patroEdit=null;renderOwner('lanc')}
+  else if(d.act==='patroedit'){patroEdit=d.id;patroNovo=false;renderOwner('lanc');window.scrollTo(0,0)}
+  else if(d.act==='patrocancela'){patroEdit=null;patroNovo=false;renderOwner('lanc')}
+  else if(d.act==='patroabre'){patroAbre=patroAbre===d.id?null:d.id;renderOwner('lanc')}
+  else if(d.act==='patrosalva'){
+    const nome=$('#pn').value.trim(),contato=$('#pc').value.trim(),combinado=parseFloat($('#pv').value||'0'),descricao=$('#pdsc').value.trim();
+    if(!nome){$('#perr').textContent='Informe o nome do patrocinador.';return}
+    if(!(combinado>=0)){$('#perr').textContent='Informe o valor combinado.';return}
+    const row={nome,contato,combinado,descricao};if($('#pat'))row.ativo=!$('#pat').checked;
+    await guard(btn,async()=>{
+      const{error}=patroEdit?await sb.from('patrocinadores').update(row).eq('id',patroEdit):await sb.from('patrocinadores').insert(row);
+      if(fail(error))return;const era=!!patroEdit;patroEdit=null;patroNovo=false;await refreshOwner('lanc');toast(era?'Patrocinador atualizado.':'Patrocinador cadastrado.');
+    });
+  }
+  else if(d.act==='patrodel'){
+    if((D.patroPag||[]).some(x=>x.patrocinador_id===d.id)){toast('Este patrocinador já tem pagamentos. Marque "Patrocínio encerrado" em vez de apagar.');return}
+    if(!confirm('Apagar este patrocinador?'))return;
+    const{error}=await sb.from('patrocinadores').delete().eq('id',d.id);if(fail(error))return;patroEdit=null;await refreshOwner('lanc');
+  }
+  else if(d.act==='patropaga'){
+    const valor=parseFloat($('#ppv').value),data=$('#ppd').value,forma=$('#ppf').value;
+    if(!(valor>0)||!data){$('#pperr').textContent='Informe valor maior que zero e data.';return}
+    await guard(btn,async()=>{
+      const{error}=await sb.rpc('registrar_patrocinio',{p_patro:d.id,p_valor:valor,p_data:data,p_forma:forma});
+      if(fail(error))return;patroAbre=null;await refreshOwner('lanc');toast('Pagamento registrado. Já entrou no caixa.');
+    });
+  }
+  else if(d.act==='patropagdel'){
+    if(!confirm('Apagar este pagamento? Ele sai do caixa também.'))return;
+    const{error}=await sb.rpc('remover_pagamento_patrocinio',{p_id:d.id});if(fail(error))return;await refreshOwner('lanc');
+  }
+  else if(d.act==='patrolembra'){
+    const p=(D.patros||[]).find(x=>x.id===d.id);if(!p)return;
+    const f=Math.max(0,Number(p.combinado)-patroRec(p.id));
+    const txt=`Olá! Aqui é da Escolinha Peñarol. Passando para lembrar do patrocínio combinado${p.descricao?' ('+p.descricao+')':''}: falta ${fmt(f)} de ${fmt(Number(p.combinado))}. Muito obrigado pelo apoio à nossa escolinha! 💛🖤`;
+    window.open(wpp(p.contato,txt),'_blank','noopener');
+  }
   else if(d.act==='addtx'){
-    const descricao=$('#ld').value.trim(),valor=parseFloat($('#lv').value),data=$('#la').value,categoria=$('#lc').value,f=$('#lnota').files[0],rm=$('#lnrm')&&$('#lnrm').checked;
+    const descricao=$('#ld').value.trim(),valor=parseFloat($('#lv').value),data=$('#la').value,f=$('#lnota').files[0],rm=$('#lnrm')&&$('#lnrm').checked;
     if(!descricao||!(valor>0)||!data){$('#lerr2').textContent='Informe descrição, valor maior que zero e data.';return}
     await guard(btn,async()=>{
       let nota;if(f){nota=await subirNota(f);if(!nota)return}else if(rm)nota=null;
-      const row={categoria,descricao,valor,data};if(nota!==undefined)row.nota=nota;
+      const row={descricao,valor,data};if(nota!==undefined)row.nota=nota;
       const velha=lancEdit?(D.lanc.find(x=>x.id===lancEdit)||{}).nota:null;
-      const{error}=lancEdit?await sb.from('lancamentos').update(row).eq('id',lancEdit):await sb.from('lancamentos').insert(Object.assign({tipo:ltipo},row));
+      const{error}=lancEdit?await sb.from('lancamentos').update(row).eq('id',lancEdit):await sb.from('lancamentos').insert(Object.assign({tipo:ltipo,categoria:ltipo==='in'?'Outras entradas':'Outras saídas'},row));
       if(fail(error))return;
       if(velha&&nota!==undefined&&velha!==nota)await sb.storage.from('notas').remove([velha]);
-      const era=!!lancEdit;lancEdit=null;await refreshOwner('lanc');toast(era?'Lançamento atualizado.':'Lançamento salvo.');
+      const era=!!lancEdit;lancEdit=null;await refreshOwner('lanc');toast(era?'Lançamento atualizado.':(ltipo==='in'?'Entrada salva.':'Saída salva.'));
     });
   }
   else if(d.act==='edittx'){lancEdit=d.id;renderOwner('lanc');window.scrollTo(0,0)}
@@ -1181,7 +1258,7 @@ async function acao(d,btn){
     if(w)w.location=data.signedUrl;else location.href=data.signedUrl;
   }
   else if(d.act==='deltx'){
-    if(!confirm('Apagar este lançamento?'))return;
+    if(!confirm(patroLanc(d.id)?'Apagar este lançamento? O pagamento do patrocinador some junto.':'Apagar este lançamento?'))return;
     const x=D.lanc.find(y=>y.id===d.id);
     const{error}=await sb.from('lancamentos').delete().eq('id',d.id);if(fail(error))return;
     if(x&&x.nota)await sb.storage.from('notas').remove([x.nota]);
