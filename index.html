@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7uUjSobQQomJIBtDWeCa+C6oBEqKRtPDbD9SkJqiAJA=' 'sha256-jGVhKKWDaX3uW0f/x66xZQ0W/S3GTETbSw5J1UPXAcM=' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src https://ihiaoaorhyefhysqgadr.supabase.co wss://ihiaoaorhyefhysqgadr.supabase.co; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7uUjSobQQomJIBtDWeCa+C6oBEqKRtPDbD9SkJqiAJA=' 'sha256-nCkpcCDDYFxu4pgC2xQcO+s5oPL/5jdJpeop2LWXTHI=' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src https://ihiaoaorhyefhysqgadr.supabase.co wss://ihiaoaorhyefhysqgadr.supabase.co; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Escolinha Peñarol</title>
@@ -454,7 +454,7 @@ async function route(){
     if(data.role!=='professor'){await sb.auth.signOut();go('loginprof');$('#lperr').textContent='Esta conta ainda não tem acesso de professor. Peça para a administração liberar.';return}}
   if(perfil.role==='dono'){tab='chamada';await loadOwner();go('owner');renderOwner()}
   else if(perfil.role==='professor'){await loadProf();go('prof');renderProf()}
-  else{await loadPais();go('pais');renderPais()}
+  else{await loadPais();go('pais');renderPais();if(!D.alunos.length)abrirFicha()}
 }
 function init(){
   if(!C.SUPABASE_URL||!C.SUPABASE_ANON_KEY){go('setup');return}
@@ -631,7 +631,7 @@ const fl=(id,label,attrs='')=>`<label for="${id}">${label}</label><input id="${i
 const sim=(id,label,q)=>`<label for="${id}">${label}</label><select id="${id}"><option value="">Selecione</option><option value="n">Não</option><option value="s">Sim</option></select><div id="${id}q" hidden><label for="${id}t">${q}</label><input id="${id}t" autocomplete="off"></div>`;
 function abrirFicha(){
   fotoNova='';
-  $('#fichac').innerHTML=`<p class="hint" style="margin-top:12px">Os dados desta ficha são usados só pela escolinha, para a inscrição e a segurança do atleta. Ficam visíveis apenas para a administração e para você.</p>
+  $('#fichac').innerHTML=`${D.alunos.length?'':'<div class="card ok"><h3>Falta só um passo</h3><p class="hint" style="margin:0">Preencha a ficha do atleta e toque em <b>Enviar inscrição</b> no final. Aí o app mostra o dia e o horário do treino.</p></div>'}<p class="hint" style="margin-top:12px">Os dados desta ficha são usados só pela escolinha, para a inscrição e a segurança do atleta. Ficam visíveis apenas para a administração e para você.</p>
   <h3 class="sec">Dados do atleta</h3>
   ${fl('f_nome','Nome completo','autocomplete="off"')}
   ${fl('f_nasc','Data de nascimento','type="date"')}
@@ -986,7 +986,7 @@ function vAlunos(){
   return `${compCard}<div class="card ok"><h3>Convidar os pais</h3><p class="hint" style="margin:0">Envia o link do app com o passo a passo da inscrição.</p>
   <button class="btn p" data-act="share" style="margin-top:12px">Compartilhar o app</button>
   <button class="btn" data-act="wpp">Enviar pelo WhatsApp</button>
-  <button class="btn" data-act="copiarmsg">Copiar mensagem</button></div>
+  <button class="btn" data-act="copiarmsg">Copiar mensagem</button></div>${(()=>{const sem=D.contas.filter(c=>c.role!=='dono'&&c.role!=='professor'&&!D.alunos.some(a=>a.responsavel_id===c.id));return sem.length?`<div class="card"><h3>Contas sem inscrição</h3><p class="hint" style="margin:0">Criaram a conta, mas ainda não enviaram a ficha do atleta.</p>${sem.map(c=>`<div class="row"><div><b>${esc(c.nome||'Sem nome')}</b><small>${esc(c.tel||'sem telefone')}</small></div>${c.tel?`<button class="mini" data-act="lembrarficha" data-id="${c.id}">Lembrar</button>`:''}</div>`).join('')}</div>`:''})()}
   <div class="grid3"><div class="k"><small>Alunos</small><b>${ativosL.length}</b></div><div class="k"><small>Pagaram</small><b class="in">${ativosL.filter(s=>pagos.has(s.id)).length}</b></div><div class="k"><small>Pendentes</small><b class="out">${ativosL.filter(s=>!pagos.has(s.id)).length}</b></div></div>
   <label for="fee">Mensalidade (R$)</label><input id="fee" type="number" inputmode="decimal" min="0" step="0.01" value="${D.fee}">
   <label for="venc">Dia do vencimento (geral)</label><select id="venc"><option value="">Sem vencimento</option>${Array.from({length:31},(_,i)=>i+1).map(n=>`<option value="${n}"${VENC===n?' selected':''}>Todo dia ${n}</option>`).join('')}</select>
@@ -1097,6 +1097,12 @@ async function acao(d,btn){
   }
   else if(d.act==='copia'){
     await guard(btn,async()=>{try{const txt=await copiaSeguranca();await baixar(`copia-penarol-${today()}.json`,txt,'application/json');try{localStorage.setItem('penarol_copia',today())}catch(_){}toast('Cópia gerada.')}catch(_){toast('Não foi possível gerar a cópia. Tente de novo.')}});
+  }
+  else if(d.act==='lembrarficha'){
+    const c=D.contas.find(x=>x.id===d.id);if(!c)return;
+    const nm=String(c.nome||'').split(' ')[0];
+    const txt=`Olá${nm?', '+nm:''}! Vi que você já criou sua conta no app da Escolinha Peñarol 👏 Falta só um passo: entre no app, toque em *Preencher ficha de inscrição* e vá até o botão *Enviar inscrição* no final. Aí o app já mostra o dia e o horário do treino.\n${location.origin+location.pathname}\nQualquer dúvida, me chama! 💛🖤`;
+    window.open(wpp(c.tel,txt),'_blank');
   }
   else if(d.act==='finmodo'){finModo=d.id;renderOwner('resumo')}
   else if(d.act==='finper'){const cur=ymOf(new Date()),n=Number(d.id);if(finModo==='mes'){const k=ymAdd(finMes||cur,n);if(k<=cur)finMes=k}else{const a=finAno+n;if(a<=new Date().getFullYear())finAno=a}renderOwner('resumo')}
